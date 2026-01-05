@@ -1,3 +1,13 @@
+## Live
+
+https://skylight-recipes.netlify.app
+
+## Importing recipes
+
+Go to `/admin/import`, paste recipe JSON, and enter the import password.
+
+Used as a personal recipe source for Skylight meal planning.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
