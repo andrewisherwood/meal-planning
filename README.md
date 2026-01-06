@@ -1,3 +1,6 @@
+V1 = Weekly planning → calendar → leftovers → shopping list
+Anything else = later
+
 ## Live
 
 https://skylight-recipes.netlify.app
