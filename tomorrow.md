@@ -1,5 +1,6 @@
 Before you start:
 git pull --rebase
 
-Now: Seed household data
-Next: Render seeded meal_plan grouped by date → slot → pos
+1: Seed household data
+Now: Render seeded meal_plan grouped by date → slot → pos
+Next: click a plan item to open recipe detail (ingredients + steps).
