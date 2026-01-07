@@ -30,9 +30,18 @@ Goal: Your family can sign up and use this for real.
 - View/edit name, email
 - Household settings
 
-### Loop 6.6 Protected routes
+### Loop 6.6 Database Migration - RLS
+- Enable RLS on all tables
+- Add household_id to recipes (NULL = shared, non-null = private)
+- Create RLS policies for data isolation
+
+### Loop 6.7 Protected routes
 - Redirect to login if not authenticated
 - Replace hardcoded "isherwood" with user's actual household
+
+### Loop 6.8 User profile & settings
+- Settings page with Skylight email (for Phase 7)
+- Sign out button
 
 Stop condition: family members can create accounts and see their shared plan.
 

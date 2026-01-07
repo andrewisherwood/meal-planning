@@ -27,12 +27,12 @@ This is a **planning surface** that happens to know about food.
 2. **Desktop / tablet = planning mode**
 
    - Grid-based week view (columns = days, rows = meal slots)
-   - Drag-and-drop eventually
+   - Drag-and-drop to reorder and move meals
    - Optimised for thinking and rearranging
 
 3. **Mobile = checking mode**
 
-   - Vertical day stack
+   - Vertical day stack with day tabs for navigation
    - Quick glance, minimal interaction
    - No dense grids on phones
 
@@ -56,14 +56,17 @@ This is a **planning surface** that happens to know about food.
 
 ## Data Model (Key Concepts)
 
-- `households`
-- `recipes`
-- `meal_plan`
+- `households` — family units that share a meal plan
+- `household_members` — links users to households
+- `recipes` — shared library + household-private recipes (`household_id` NULL = shared)
+- `meal_plan` — planned meals per household
   - `date` (YYYY-MM-DD)
   - `meal` (slot key, e.g. `breakfast`, `dinner:main`)
   - `pos` (ordering within a slot)
   - `recipe_id`
   - `notes`
+
+**RLS (Row Level Security)** enforces data isolation per household.
 
 Slots are **fixed and ordered**:
 
@@ -142,7 +145,7 @@ Claude should **always**:
 
 ## Current Roadmap (Looped)
 
-### Phase 0–4.5 ✅ Complete
+### Phase 0–5 ✅ Complete
 
 - Calendar grid (md+) / day stack (<md)
 - Add recipes via drawer with search + mealtime filters
@@ -151,17 +154,24 @@ Claude should **always**:
 - Multi-add behaviour (drawer stays open)
 - Skylight-inspired pastel styling (per-slot colors)
 - Responsive AddDrawer (side panel desktop, bottom mobile)
+- Drag & drop (reorder, move between days/slots)
+- Mobile day navigation tabs
 
-### Phase 5 — Drag & Drop (next)
+### Phase 6 — Auth & Households (next)
 
-- Reorder within a slot
-- Move between days
-- Move between slots (with guardrails)
+- Supabase Auth (email/magic link)
+- Household creation + invite codes
+- RLS policies for data isolation
+- Protected routes
+- User settings page
 
-### Phase 6 — Calendar Export
+### Phase 7+ — Future
 
-- Generate `.ics` feed
-- Subscribe from Skylight / Apple / Google
+- Calendar Export (ICS feed, Skylight integration)
+- Shopping List (aggregate ingredients)
+- Feedback Loop (everyone ate it, favorites)
+- Leftovers tracking
+- Smart features (LLM-powered suggestions)
 
 ---
 
@@ -171,7 +181,6 @@ Claude should **always**:
 - Macro counting
 - AI recipe generation
 - Social features
-- Multi-household sharing
 
 These belong in `later.md`, not the codebase.
 
