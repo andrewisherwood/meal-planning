@@ -2,29 +2,39 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { WeekGrid } from "@/components/plan/WeekGrid";
+import { DayStack } from "@/components/plan/DayStack";
 
-type JoinedRecipe = {
+export type JoinedRecipe = {
   id: string;
   title: string;
   slug: string;
   tags: string[] | null;
 };
 
-type PlanRow = {
+export type PlanRow = {
   id: string;
   date: string; // YYYY-MM-DD
-  meal: string; // slot key (breakfast, lunch, dinner:main, dinner:side, dinner:pudding)
+  meal: string; // slot key (breakfast, lunch, snack, dinner:main, dinner:side, dinner:pudding)
   pos: number;
   notes: string | null;
   recipe_id: string;
   recipes: JoinedRecipe | null;
 };
 
-const SLOT_ORDER = ["breakfast", "lunch", "dinner:main", "dinner:side", "dinner:pudding"] as const;
+export const SLOT_ORDER = [
+  "breakfast",
+  "lunch",
+  "snack",
+  "dinner:main",
+  "dinner:side",
+  "dinner:pudding",
+] as const;
 
-const SLOT_LABEL: Record<string, string> = {
+export const SLOT_LABEL: Record<string, string> = {
   breakfast: "Breakfast",
   lunch: "Lunch",
+  snack: "Snack",
   "dinner:main": "Dinner — Main",
   "dinner:side": "Dinner — Sides",
   "dinner:pudding": "Dinner — Pudding",
@@ -43,8 +53,10 @@ function addDays(d: Date, days: number) {
   return out;
 }
 
-function groupPlan(rows: PlanRow[]) {
-  const byDate: Record<string, Record<string, PlanRow[]>> = {};
+export type GroupedPlan = Record<string, Record<string, PlanRow[]>>;
+
+function groupPlan(rows: PlanRow[]): GroupedPlan {
+  const byDate: GroupedPlan = {};
 
   for (const r of rows) {
     (byDate[r.date] ??= {});
@@ -71,7 +83,6 @@ export default function PlanPage() {
       setLoading(true);
       setError(null);
 
-      // 1) Resolve household by slug (no hardcoded UUIDs)
       const { data: hh, error: hhErr } = await supabase
         .from("households")
         .select("id,name")
@@ -86,7 +97,6 @@ export default function PlanPage() {
 
       setHouseholdName(hh.name);
 
-      // 2) Pull the same 7-day window you seeded (today → +6)
       const start = new Date();
       const startYmd = ymd(start);
       const endYmd = ymd(addDays(start, 6));
@@ -130,51 +140,37 @@ export default function PlanPage() {
   }, []);
 
   const grouped = useMemo(() => groupPlan(rows), [rows]);
-  const dates = useMemo(() => Object.keys(grouped).sort(), [grouped]);
 
   if (loading) {
-    return <div style={{ padding: 16 }}>Loading plan…</div>;
+    return <div className="p-6 text-slate-600">Loading plan…</div>;
   }
 
   if (error) {
     return (
-      <div style={{ padding: 16 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Plan</h1>
-        <pre style={{ whiteSpace: "pre-wrap" }}>{error}</pre>
+      <div className="p-6">
+        <h1 className="text-lg font-semibold text-slate-900 mb-2">Plan</h1>
+        <pre className="whitespace-pre-wrap text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+          {error}
+        </pre>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>This Week</h1>
-      <div style={{ opacity: 0.7, marginBottom: 12 }}>{householdName}</div>
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      <div className="mb-4">
+        <h1 className="text-2xl font-semibold text-slate-900">Meal Plan</h1>
+        <div className="text-sm text-slate-500">{householdName}</div>
+      </div>
 
-      <div style={{ display: "grid", gap: 12 }}>
-        {dates.map((date) => (
-          <div key={date} style={{ border: "1px solid #e5e5e5", borderRadius: 12, padding: 12 }}>
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>{date}</div>
+      {/* md+ → Week grid (planning) */}
+      <div className="hidden md:block">
+        <WeekGrid grouped={grouped} />
+      </div>
 
-            {SLOT_ORDER.map((slot) => {
-              const items = grouped[date]?.[slot] ?? [];
-              if (!items.length) return null;
-
-              return (
-                <div key={slot} style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>{SLOT_LABEL[slot]}</div>
-                  <ul style={{ margin: 0, paddingLeft: 18 }}>
-                    {items.map((it) => (
-                      <li key={it.id}>
-                        {it.recipes?.title ?? "Untitled"}
-                        {it.notes ? <span style={{ opacity: 0.7 }}> — {it.notes}</span> : null}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-        ))}
+      {/* <md → Day stack (checking) */}
+      <div className="md:hidden">
+        <DayStack grouped={grouped} />
       </div>
     </div>
   );
