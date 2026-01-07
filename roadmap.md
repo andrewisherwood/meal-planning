@@ -238,24 +238,182 @@ touch-friendly with TouchSensor
 
 Stop condition: planning is fast and satisfying. ✅
 
-## Phase 6 — Send to Calendar (Skylight + any calendar)
+## Phase 6 — Auth & Households (next)
 
 Goal
 
-One button → week appears on calendar so decisions are finished.
+Your family can sign up and use this for real.
 
-### Loop 6.1 Generate ICS subscription feed
+### Loop 6.1 Supabase Auth setup
 
-read-only calendar users can subscribe to
+Enable auth in Supabase project
 
-events include meal title + link back
+Email/magic link authentication
 
-### Loop 6.2 Skylight-friendly option (optional)
+### Loop 6.2 Sign up / sign in pages
 
-email invites / ingestion workflow if needed
+/login and /signup routes
 
-Stop condition: meals show up in Skylight/Google/Apple calendar without manual copying.
+Form validation, error handling
 
-UI tooling
+### Loop 6.3 Household creation
+
+First user creates household, gets invite code
+
+Store household settings (name, Skylight email)
+
+### Loop 6.4 Join household flow
+
+Enter invite code to join existing household
+
+Link user to household in DB
+
+### Loop 6.5 User profile & settings page
+
+View/edit name, email
+
+Household settings (Skylight email address for Phase 7)
+
+### Loop 6.6 Protected routes
+
+Redirect to login if not authenticated
+
+Replace hardcoded "isherwood" with user's actual household
+
+Stop condition: family members can create accounts and see their shared plan.
+
+---
+
+## Phase 7 — Calendar Export
+
+Goal
+
+Decisions feel finished when they're on the calendar.
+
+### Loop 7.1 ICS subscription feed
+
+Generate .ics file per household
+
+Events include meal title + link back to app
+
+### Loop 7.2 Skylight integration
+
+Email the plan to Skylight address from settings
+
+One-button "Send to Skylight"
+
+Stop condition: meals appear on Skylight/Google/Apple calendar.
+
+---
+
+## Phase 8 — Shopping List
+
+Goal
+
+Planning leads to action.
+
+### Loop 8.1 Generate list from plan
+
+Query current week's recipes + ingredients
+
+Aggregate quantities (2 onions + 1 onion = 3 onions)
+
+### Loop 8.2 Shopping UI
+
+Checklist view, check off items as you shop
+
+Group by store section (produce, dairy, etc.)
+
+### Loop 8.3 Share list
+
+Copy to clipboard
+
+Partner sees same list (real-time sync)
+
+Stop condition: you can go shopping with just your phone.
+
+---
+
+## Phase 9 — Feedback Loop
+
+Goal
+
+Learn what works for your family.
+
+### Loop 9.1 "Everyone ate it" toggle
+
+Add to cook modal (after cooking)
+
+Store feedback per meal_plan row
+
+### Loop 9.2 Ratings
+
+Optional thumbs up/down or 1-5 stars
+
+### Loop 9.3 Surface favorites
+
+Track which recipes are hits vs misses
+
+Show "family favorites" badge in recipe picker
+
+Stop condition: good recipes bubble up naturally.
+
+---
+
+## Phase 10 — Leftovers
+
+Goal
+
+Effort pays forward.
+
+### Loop 10.1 Mark recipes as "makes leftovers"
+
+Yields 2x, batch cooking flag
+
+### Loop 10.2 Suggest leftover lunches
+
+When planning, suggest "Leftover [X]" for next day
+
+### Loop 10.3 Fridge tracking
+
+Simple list of what's in the fridge
+
+"Use up leftovers" prompt when planning
+
+Stop condition: batch cooking feels strategic, not wasteful.
+
+---
+
+## Later — Smart Features
+
+These require more data and/or LLM integration.
+
+### Onboarding
+
+Family member profiles (names, ages)
+
+Dietary requirements (vegetarian, allergies, preferences)
+
+How many meals to plan (breakfast? lunch? just dinners?)
+
+### Smart Menu Planning
+
+Rules-based suggestions (no repeat mains within 3 days)
+
+LLM-powered suggestions based on preferences + what's worked
+
+"Plan my week" button
+
+### Pantry Scanning
+
+Take photo of pantry/fridge
+
+LLM vision extracts items
+
+Suggest recipes using what you have
+
+---
+
+## UI tooling
 
 shadcn/ui installed (Drawer for AddDrawer, Dialog for CookModal).
