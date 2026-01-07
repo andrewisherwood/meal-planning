@@ -7,17 +7,21 @@ git pull --rebase
   - Warm pastel slot colors (breakfast=peach, lunch=mint, snack=cream, dinner=lavender)
   - AddDrawer: responsive (side panel desktop, bottom mobile), mealtime filters
   - CookModal: floating card with Dialog, edit/delete icons, date + tags
+- Phase 5: Drag & Drop
+  - @dnd-kit library (core, sortable, utilities)
+  - Reorder cards within slot
+  - Move cards between days (same slot)
+  - Move between dinner sub-slots (main ↔ side ↔ pudding)
+  - DragOverlay ghost card + drop zone highlights
+  - Mobile support in DayStack
 
-## Next: Phase 5 — Drag & Drop
+## Next: Phase 6 — Calendar Export
 
-### Loop 5.1 Reorder within a cell
-- drag cards within a slot → updates pos
+### Loop 6.1 Generate ICS subscription feed
+- read-only calendar users can subscribe to
+- events include meal title + link back to app
 
-### Loop 5.2 Move between days
-- drag a card to another day same slot → updates date
+### Loop 6.2 Skylight-friendly option (optional)
+- email invites / ingestion workflow if needed
 
-### Loop 5.3 Move between slots (optional rules)
-- allow main ↔ main, sides ↔ sides
-- treat with guardrails
-
-Library options: @dnd-kit or react-beautiful-dnd
+Goal: meals show up in Skylight/Google/Apple calendar without manual copying

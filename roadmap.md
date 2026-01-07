@@ -183,29 +183,60 @@ Non-dismissible (click outside blocked)
 
 Stop condition: app feels warm, calm, and Skylight-inspired. ✅
 
-## Phase 5 — Drag & Drop (next)
+## Phase 5 — Drag & Drop (done)
 
 Goal
 
 Planning feels like moving sticky notes.
 
-### Loop 5.1 Reorder within a cell
+### Loop 5.1 Install dnd-kit & basic setup (done)
 
-drag cards within a slot → updates pos
+@dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities
 
-### Loop 5.2 Move between days
+DndContext provider with PointerSensor + TouchSensor
 
-drag a card to another day same slot → updates date
+### Loop 5.2 Sortable cards within slot (done)
 
-### Loop 5.3 Move between slots (optional rules)
+SortableContext wrapping card lists
 
-likely allow main ↔ main
+useSortable hook for draggable cards
 
-allow sides ↔ sides
+CSS transforms for drag animations
 
-treat with guardrails
+### Loop 5.3 Persist reorder within slot (done)
 
-Stop condition: planning is fast and satisfying.
+handleDragEnd calculates new pos values
+
+optimistic UI update + Supabase persist
+
+### Loop 5.4 Move between days (done)
+
+DroppableCell components for cross-day drops
+
+date field updates on drop
+
+### Loop 5.5 Move between slots with guardrails (done)
+
+canMoveToSlot() helper enforces rules:
+- same slot type always allowed
+- dinner sub-slots can interchange
+- other cross-slot moves blocked
+
+### Loop 5.6 Drag visual feedback (done)
+
+DragOverlay shows ghost card following cursor
+
+source card dims while dragging
+
+drop zones highlight on hover
+
+### Loop 5.7 DayStack mobile drag support (done)
+
+SortableContext + useSortable in DayStack
+
+touch-friendly with TouchSensor
+
+Stop condition: planning is fast and satisfying. ✅
 
 ## Phase 6 — Send to Calendar (Skylight + any calendar)
 

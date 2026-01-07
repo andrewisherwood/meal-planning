@@ -1,5 +1,8 @@
 import type { GroupedPlan, PlanRow, SelectedCell } from "@/app/plan/page";
 import { SLOT_LABEL, SLOT_ORDER } from "@/app/plan/page";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 
 // Slot color mapping for warm pastel theme (shared with WeekGrid)
 const SLOT_COLORS: Record<string, { bg: string; card: string; border: string }> = {
@@ -46,6 +49,72 @@ function pickDefaultDay(grouped: GroupedPlan) {
   return Object.keys(grouped).sort()[0];
 }
 
+// Droppable cell wrapper for cross-slot drops
+function DroppableCell({
+  date,
+  slot,
+  colors,
+  children,
+}: {
+  date: string;
+  slot: string;
+  colors: { bg: string; card: string; border: string };
+  children: React.ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `cell-${date}-${slot}`,
+    data: { type: "cell", date, slot },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`rounded-2xl ${colors.bg} border ${colors.border} p-3 transition-colors ${
+        isOver ? "ring-2 ring-text-primary ring-opacity-50" : ""
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Sortable card component for drag-and-drop
+function SortableCard({
+  item,
+  colors,
+  onMealClick,
+}: {
+  item: PlanRow;
+  colors: { bg: string; card: string; border: string };
+  onMealClick: (meal: PlanRow) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+    data: { type: "card", item },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: isDragging ? "grabbing" : "grab",
+  };
+
+  return (
+    <button
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      type="button"
+      onClick={() => onMealClick(item)}
+      className={`rounded-xl ${colors.card} border ${colors.border} px-3 py-2 text-sm text-text-primary text-left hover:opacity-80 transition-opacity touch-none`}
+    >
+      <span className="font-medium">{item.recipes?.title ?? "Untitled"}</span>
+    </button>
+  );
+}
+
 type DayStackProps = {
   grouped: GroupedPlan;
   onCellClick: (cell: SelectedCell) => void;
@@ -65,33 +134,29 @@ export function DayStack({ grouped, onCellClick, onMealClick }: DayStackProps) {
       {SLOT_ORDER.map((slot) => {
         const items: PlanRow[] = slots[slot] ?? [];
         const colors = SLOT_COLORS[slot] ?? SLOT_COLORS.breakfast;
+        const itemIds = items.map((it) => it.id);
 
         return (
           <section key={slot} className="space-y-2">
             <div className="px-1 text-sm font-medium text-text-secondary">{SLOT_LABEL[slot]}</div>
 
-            <div className={`rounded-2xl ${colors.bg} border ${colors.border} p-3`}>
-              <div className="flex flex-col gap-2">
-                {items.map((it) => (
-                  <button
-                    key={it.id}
-                    type="button"
-                    onClick={() => onMealClick(it)}
-                    className={`rounded-xl ${colors.card} border ${colors.border} px-3 py-2 text-sm text-text-primary text-left hover:opacity-80 transition-opacity cursor-pointer`}
-                  >
-                    <span className="font-medium">{it.recipes?.title ?? "Untitled"}</span>
-                  </button>
-                ))}
+            <DroppableCell date={day} slot={slot} colors={colors}>
+              <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+                <div className="flex flex-col gap-2">
+                  {items.map((it) => (
+                    <SortableCard key={it.id} item={it} colors={colors} onMealClick={onMealClick} />
+                  ))}
 
-                <button
-                  type="button"
-                  onClick={() => onCellClick({ date: day, slot })}
-                  className={`rounded-xl border border-dashed ${colors.border} bg-white/50 px-3 py-2 text-xs text-text-muted hover:bg-white/80 transition-colors cursor-pointer`}
-                >
-                  Tap to add
-                </button>
-              </div>
-            </div>
+                  <button
+                    type="button"
+                    onClick={() => onCellClick({ date: day, slot })}
+                    className={`rounded-xl border border-dashed ${colors.border} bg-white/50 px-3 py-2 text-xs text-text-muted hover:bg-white/80 transition-colors cursor-pointer`}
+                  >
+                    Tap to add
+                  </button>
+                </div>
+              </SortableContext>
+            </DroppableCell>
           </section>
         );
       })}
