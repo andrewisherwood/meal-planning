@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { WeekGrid } from "@/components/plan/WeekGrid";
 import { DayStack } from "@/components/plan/DayStack";
 import { AddDrawer } from "@/components/plan/AddDrawer";
+import { CookModal } from "@/components/plan/CookModal";
 
 export type JoinedRecipe = {
   id: string;
@@ -89,6 +90,7 @@ export default function PlanPage() {
   const [householdName, setHouseholdName] = useState<string>("");
   const [householdId, setHouseholdId] = useState<string>("");
   const [selectedCell, setSelectedCell] = useState<SelectedCell>(null);
+  const [selectedMeal, setSelectedMeal] = useState<PlanRow | null>(null);
 
   useEffect(() => {
     const run = async () => {
@@ -222,12 +224,12 @@ export default function PlanPage() {
 
       {/* md+ → Week grid (planning) */}
       <div className="hidden md:block">
-        <WeekGrid grouped={grouped} onCellClick={setSelectedCell} />
+        <WeekGrid grouped={grouped} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
       </div>
 
       {/* <md → Day stack (checking) */}
       <div className="md:hidden">
-        <DayStack grouped={grouped} onCellClick={setSelectedCell} />
+        <DayStack grouped={grouped} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
       </div>
 
       {/* Add drawer */}
@@ -241,6 +243,9 @@ export default function PlanPage() {
           onAddRecipe={handleAddRecipe}
         />
       )}
+
+      {/* Cook modal */}
+      <CookModal meal={selectedMeal} onClose={() => setSelectedMeal(null)} />
     </div>
   );
 }

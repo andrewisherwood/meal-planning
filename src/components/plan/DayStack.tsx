@@ -10,9 +10,10 @@ function pickDefaultDay(grouped: GroupedPlan) {
 type DayStackProps = {
   grouped: GroupedPlan;
   onCellClick: (cell: SelectedCell) => void;
+  onMealClick: (meal: PlanRow) => void;
 };
 
-export function DayStack({ grouped, onCellClick }: DayStackProps) {
+export function DayStack({ grouped, onCellClick, onMealClick }: DayStackProps) {
   const day = pickDefaultDay(grouped);
   const slots = grouped[day] ?? {};
 
@@ -33,12 +34,14 @@ export function DayStack({ grouped, onCellClick }: DayStackProps) {
             <div className="rounded-xl bg-surface-muted border border-border p-3">
               <div className="flex flex-col gap-2">
                 {items.map((it) => (
-                  <div
+                  <button
                     key={it.id}
-                    className="rounded-lg bg-surface border border-border px-3 py-2 text-sm text-text-primary"
+                    type="button"
+                    onClick={() => onMealClick(it)}
+                    className="rounded-lg bg-surface border border-border px-3 py-2 text-sm text-text-primary text-left hover:bg-surface-muted transition-colors cursor-pointer"
                   >
                     {it.recipes?.title ?? "Untitled"}
-                  </div>
+                  </button>
                 ))}
 
                 <button

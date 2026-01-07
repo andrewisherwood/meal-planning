@@ -8,9 +8,10 @@ function formatHeader(ymd: string) {
 type WeekGridProps = {
   grouped: GroupedPlan;
   onCellClick: (cell: SelectedCell) => void;
+  onMealClick: (meal: PlanRow) => void;
 };
 
-export function WeekGrid({ grouped, onCellClick }: WeekGridProps) {
+export function WeekGrid({ grouped, onCellClick, onMealClick }: WeekGridProps) {
   const dates = Object.keys(grouped).sort();
   const labelCol = "160px";
   const gridCols = `${labelCol} repeat(${dates.length}, minmax(0, 1fr))`;
@@ -31,7 +32,7 @@ export function WeekGrid({ grouped, onCellClick }: WeekGridProps) {
 
         {/* Body rows */}
         {SLOT_ORDER.map((slot) => (
-          <Row key={slot} slot={slot} dates={dates} grouped={grouped} onCellClick={onCellClick} />
+          <Row key={slot} slot={slot} dates={dates} grouped={grouped} onCellClick={onCellClick} onMealClick={onMealClick} />
         ))}
       </div>
     </div>
@@ -43,11 +44,13 @@ function Row({
   dates,
   grouped,
   onCellClick,
+  onMealClick,
 }: {
   slot: (typeof SLOT_ORDER)[number];
   dates: string[];
   grouped: GroupedPlan;
   onCellClick: (cell: SelectedCell) => void;
+  onMealClick: (meal: PlanRow) => void;
 }) {
   return (
     <>
@@ -65,15 +68,17 @@ function Row({
             <div className="min-h-[72px] rounded-xl bg-surface-muted p-2">
               <div className="flex flex-col gap-2">
                 {items.map((it) => (
-                  <div
+                  <button
                     key={it.id}
-                    className="rounded-lg bg-surface border border-border px-3 py-2 text-sm text-text-primary shadow-sm"
+                    type="button"
+                    onClick={() => onMealClick(it)}
+                    className="rounded-lg bg-surface border border-border px-3 py-2 text-sm text-text-primary shadow-sm text-left hover:bg-surface-muted transition-colors cursor-pointer"
                   >
                     <div className="line-clamp-2">{it.recipes?.title ?? "Untitled"}</div>
                     {it.notes ? (
                       <div className="mt-1 text-xs text-text-secondary line-clamp-2">{it.notes}</div>
                     ) : null}
-                  </div>
+                  </button>
                 ))}
 
                 <button
