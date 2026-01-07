@@ -29,13 +29,13 @@ grouped by date → slot → pos
 
 Stop condition: week looks like a real family eats ✅
 
-## Phase 1 — Calendar Grid View (scan like Skylight)
+## Phase 1 — Calendar Grid View (done)
 
 Goal
 
 A week view you can scan instantly: columns = days, rows = mealtimes, cells contain 0..N cards.
 
-### Loop 1.1 Grid layout only
+### Loop 1.1 Grid layout only (done)
 
 header row = 7 day labels
 
@@ -43,15 +43,15 @@ left column = slot labels
 
 cells render cards (title only), sorted by pos
 
-### Loop 1.2 Snack row added
+### Loop 1.2 Snack row added (done)
 
 include snack in slot order + labels
 
-render even when empty (so it’s always available)
+render even when empty (so it's always available)
 
-Stop condition: you can “see the week” at a glance like a calendar.
+Stop condition: you can "see the week" at a glance like a calendar. ✅
 
-## Phase 2 — Add Recipes (no + button clutter)
+## Phase 2 — Add Recipes (done)
 
 Goal
 
@@ -59,85 +59,79 @@ Planning is editable without friction.
 
 Interaction:
 
-Tap a mealtime cell → opens “Add to this slot” drawer
+Tap a mealtime cell → opens "Add to this slot" drawer
 
 Tap a card → opens cook modal (Phase 3)
 
-### Loop 2.1 Cell tap opens Add Drawer (context-aware)
+### Loop 2.1 Cell tap opens Add Drawer (done)
 
 drawer title includes date + slot
 
 close button
 
-no search yet (dummy content)
-
-### Loop 2.2 Search recipes inside drawer
+### Loop 2.2 Search recipes inside drawer (done)
 
 search input
 
 results list
 
-quick picks when empty (e.g. most recent recipes)
+quick picks when empty (most recent recipes)
 
-### Loop 2.3 Selecting a recipe creates a plan item
+### Loop 2.3 Selecting a recipe creates a plan item (done)
 
-insert into meal_plan with:
-
-household_id
-
-date
-
-slot
-
-pos = max(pos)+1 for that date+slot
+insert into meal_plan with household_id, date, slot, pos
 
 optimistic UI update (card appears immediately)
 
-Stop condition: you can build a week plan from the grid without leaving the page.
+Stop condition: you can build a week plan from the grid without leaving the page. ✅
 
-## Phase 3 — Cook Modal (persistent, calm)
+## Phase 3 — Cook Modal (done)
 
 Goal
 
 Click a card, cook from it, close when finished.
 
-### Loop 3.1 Card click opens modal
+### Loop 3.1 Card click opens modal (done)
 
 modal shows recipe title
 
 explicit close button
 
-doesn’t dismiss by accidental outside click (persistent while cooking)
+doesn't dismiss by accidental outside click (persistent while cooking)
 
-### Loop 3.2 Modal loads recipe details
+### Loop 3.2 Modal loads recipe details (done)
 
 ingredients (from recipe_ingredients)
 
 steps (from recipe_steps)
 
-optional notes/tags
+tags displayed below title
 
-Stop condition: you can cook dinner with the modal open and not lose it.
+Stop condition: you can cook dinner with the modal open and not lose it. ✅
 
-## Phase 4 — Plan Editing Quality (small but important)
+## Phase 4 — Plan Editing Quality (done)
 
 Goal
 
 Make planning feel forgiving.
 
-### Loop 4.1 Remove a plan card
+### Loop 4.1 Remove a plan card (done)
 
 delete that meal_plan row
 
 card disappears immediately
 
-### Loop 4.2 Multiple add behaviour
+"Remove from plan" button in cook modal
 
-keep drawer open for sides/pudding/snack (because you often add several)
+### Loop 4.2 Multiple add behaviour (done)
 
-optional: auto-close for dinner main
+drawer stays open for sides/pudding/snack/breakfast/lunch
 
-Stop condition: editing the plan doesn’t create friction or guilt.
+auto-close for dinner:main only
+
+notification shows "{recipe} added to {slot} for {day}"
+
+Stop condition: editing the plan doesn't create friction or guilt. ✅
 
 ## Phase 5 — Drag & Drop (nice but later)
 
@@ -181,8 +175,6 @@ email invites / ingestion workflow if needed
 
 Stop condition: meals show up in Skylight/Google/Apple calendar without manual copying.
 
-Optional UI tooling
+UI tooling
 
-Install shadcn/ui when you start Phase 2/3 (drawer + dialog are perfect for this).
-
-Don’t install before you need it.
+shadcn/ui installed (drawer component used for AddDrawer and CookModal).

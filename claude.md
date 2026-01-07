@@ -47,7 +47,8 @@ This is a **planning surface** that happens to know about food.
 
 - **Next.js (App Router)**
 - **Supabase** (Postgres + auth)
-- **Tailwind CSS**
+- **Tailwind CSS v4** with semantic CSS variables
+- **shadcn/ui** (drawer component)
 - No heavy client state libraries
 - No premature abstractions
 
@@ -94,11 +95,14 @@ There must be **one codepath for data**, multiple renderers for layout.
 
 ## Interaction Philosophy (Important)
 
-- Clicking a meal card opens a **modal / drawer**
+- Clicking a meal card opens a **cook modal**
 - Modal:
   - Shows recipe, ingredients, steps
-  - Persists while cooking
-  - Closes by tapping outside (no explicit close button required)
+  - Persists while cooking (doesn't dismiss on outside click)
+  - Explicit close button + "Remove from plan" action
+- Clicking empty slot opens **add drawer**
+  - Search recipes, tap to add
+  - Stays open for multi-add slots (sides, snacks, etc.)
 - Planning actions should feel **light and reversible**
 - Avoid modal chains, wizards, or blocking flows
 
@@ -138,30 +142,21 @@ Claude should **always**:
 
 ## Current Roadmap (Looped)
 
-### Loop 1 — Calendar Surface ✅
+### Phase 0–4 ✅ Complete
 
-- Seed household + meal plan
-- Render weekly plan
-- Responsive: grid (md+) / stack (<md)
+- Calendar grid (md+) / day stack (<md)
+- Add recipes via drawer with search
+- Cook modal with ingredients + steps
+- Remove from plan
+- Multi-add behaviour (drawer stays open)
 
-### Loop 2 — Recipe Modal
+### Phase 5 — Drag & Drop (next)
 
-- Click card → open modal
-- Show ingredients + steps
-- Modal persists while cooking
+- Reorder within a slot
+- Move between days
+- Move between slots (with guardrails)
 
-### Loop 3 — Add to Plan
-
-- Click empty cell / slot
-- Search recipes
-- Add to correct date + slot
-
-### Loop 4 — Reordering
-
-- Drag cards within a slot
-- Persist `pos`
-
-### Loop 5 — Calendar Export
+### Phase 6 — Calendar Export
 
 - Generate `.ics` feed
 - Subscribe from Skylight / Apple / Google
