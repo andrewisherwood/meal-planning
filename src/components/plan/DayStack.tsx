@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { GroupedPlan, PlanRow, SelectedCell } from "@/app/plan/page";
 import { SLOT_LABEL, SLOT_ORDER } from "@/app/plan/page";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -43,10 +44,9 @@ function formatDay(ymd: string) {
   return date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" });
 }
 
-function pickDefaultDay(grouped: GroupedPlan) {
-  // For Loop 1, pick the earliest day in the loaded range.
-  // Later we'll choose "today" if present and add a date picker.
-  return Object.keys(grouped).sort()[0];
+function formatDayShort(ymd: string) {
+  const date = new Date(ymd + "T00:00:00");
+  return date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric" });
 }
 
 // Droppable cell wrapper for cross-slot drops
@@ -116,17 +116,38 @@ function SortableCard({
 }
 
 type DayStackProps = {
+  dates: string[];
   grouped: GroupedPlan;
   onCellClick: (cell: SelectedCell) => void;
   onMealClick: (meal: PlanRow) => void;
 };
 
-export function DayStack({ grouped, onCellClick, onMealClick }: DayStackProps) {
-  const day = pickDefaultDay(grouped);
+export function DayStack({ dates, grouped, onCellClick, onMealClick }: DayStackProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const day = dates[selectedIndex] ?? dates[0];
   const slots = grouped[day] ?? {};
 
   return (
     <div className="space-y-4">
+      {/* Day tabs - horizontal scroll */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+        {dates.map((d, i) => (
+          <button
+            key={d}
+            type="button"
+            onClick={() => setSelectedIndex(i)}
+            className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+              i === selectedIndex
+                ? "bg-text-primary text-white"
+                : "bg-surface-muted text-text-secondary hover:bg-surface-muted/80"
+            }`}
+          >
+            {formatDayShort(d)}
+          </button>
+        ))}
+      </div>
+
+      {/* Current day header */}
       <div className="px-1">
         <div className="text-xl font-semibold text-text-primary">{formatDay(day)}</div>
       </div>

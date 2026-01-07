@@ -59,18 +59,6 @@ function addDays(d: Date, days: number) {
 
 export type GroupedPlan = Record<string, Record<string, PlanRow[]>>;
 
-// Slot movement guardrails
-const DINNER_SLOTS = ["dinner:main", "dinner:side", "dinner:pudding"];
-
-function canMoveToSlot(sourceSlot: string, destSlot: string): boolean {
-  // Same slot type = always allowed
-  if (sourceSlot === destSlot) return true;
-  // Dinner sub-slots can interchange
-  if (DINNER_SLOTS.includes(sourceSlot) && DINNER_SLOTS.includes(destSlot)) return true;
-  // Otherwise blocked
-  return false;
-}
-
 function groupPlan(rows: PlanRow[]): GroupedPlan {
   const byDate: GroupedPlan = {};
 
@@ -141,12 +129,6 @@ export default function PlanPage() {
 
       // Skip if dropped on same cell
       if (activeItem.date === targetDate && activeItem.meal === targetSlot) return;
-
-      // Apply slot movement guardrails
-      if (!canMoveToSlot(activeItem.meal, targetSlot)) {
-        // Block the move - only dinner sub-slots can interchange
-        return;
-      }
 
       // Calculate new pos (append to end of target slot)
       const targetSlotItems = rows.filter(
@@ -315,6 +297,12 @@ export default function PlanPage() {
 
   const grouped = useMemo(() => groupPlan(rows), [rows]);
 
+  // Generate all 7 days starting from today (ensures empty days show in grid)
+  const weekDates = useMemo(() => {
+    const start = new Date();
+    return Array.from({ length: 7 }, (_, i) => ymd(addDays(start, i)));
+  }, []);
+
   const handleAddRecipe = async (recipe: Recipe) => {
     if (!selectedCell) return;
 
@@ -401,12 +389,12 @@ export default function PlanPage() {
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* md+ → Week grid (planning) */}
         <div className="hidden md:block">
-          <WeekGrid grouped={grouped} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
+          <WeekGrid dates={weekDates} grouped={grouped} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
         </div>
 
         {/* <md → Day stack (checking) */}
         <div className="md:hidden">
-          <DayStack grouped={grouped} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
+          <DayStack dates={weekDates} grouped={grouped} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
         </div>
 
         {/* Drag overlay - ghost card that follows cursor */}

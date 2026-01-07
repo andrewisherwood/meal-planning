@@ -46,13 +46,13 @@ function formatHeader(ymd: string) {
 }
 
 type WeekGridProps = {
+  dates: string[];
   grouped: GroupedPlan;
   onCellClick: (cell: SelectedCell) => void;
   onMealClick: (meal: PlanRow) => void;
 };
 
-export function WeekGrid({ grouped, onCellClick, onMealClick }: WeekGridProps) {
-  const dates = Object.keys(grouped).sort();
+export function WeekGrid({ dates, grouped, onCellClick, onMealClick }: WeekGridProps) {
   const labelCol = "160px";
   const gridCols = `${labelCol} repeat(${dates.length}, minmax(0, 1fr))`;
 
