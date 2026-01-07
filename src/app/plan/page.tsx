@@ -200,6 +200,25 @@ export default function PlanPage() {
     }
   };
 
+  const handleDeleteMeal = async () => {
+    if (!selectedMeal) return;
+
+    // Optimistic update
+    setRows(rows.filter((r) => r.id !== selectedMeal.id));
+    setSelectedMeal(null);
+
+    // Persist to DB
+    const { error } = await supabase
+      .from("meal_plan")
+      .delete()
+      .eq("id", selectedMeal.id);
+
+    if (error) {
+      console.error("Failed to delete meal:", error);
+      // Could revert optimistic update here if needed
+    }
+  };
+
   if (loading) {
     return <div className="p-6 text-text-secondary">Loading plan…</div>;
   }
@@ -245,7 +264,11 @@ export default function PlanPage() {
       )}
 
       {/* Cook modal */}
-      <CookModal meal={selectedMeal} onClose={() => setSelectedMeal(null)} />
+      <CookModal
+        meal={selectedMeal}
+        onClose={() => setSelectedMeal(null)}
+        onDelete={handleDeleteMeal}
+      />
     </div>
   );
 }

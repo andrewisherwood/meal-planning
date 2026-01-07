@@ -17,9 +17,10 @@ type Step = { id: string; step_no: number; text: string };
 type CookModalProps = {
   meal: PlanRow | null;
   onClose: () => void;
+  onDelete: () => void;
 };
 
-export function CookModal({ meal, onClose }: CookModalProps) {
+export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState(false);
@@ -139,6 +140,15 @@ export function CookModal({ meal, onClose }: CookModalProps) {
                   <p className="text-sm text-text-muted">No steps listed</p>
                 )}
               </section>
+
+              {/* Delete action */}
+              <button
+                type="button"
+                onClick={onDelete}
+                className="w-full py-2 text-sm text-destructive hover:text-destructive/80 transition-colors cursor-pointer"
+              >
+                Remove from plan
+              </button>
             </>
           )}
         </div>
