@@ -1,15 +1,23 @@
 Before you start:
 git pull --rebase
 
-1: Seed household data
-2: Render seeded meal_plan grouped by date → slot → pos
-3: grid layout and move repo folder up one and snack row added
-4: Refactor styling so that there are semantic global vars.
-5: Loop 2.1 6. Calendar icon leading to /plan
-6: Loop 2.2
-7: Loop 2.3
-8: Loop 3.1
-9: Loop 3.2
-10: Loop 4.1
-11: Loop 4.2
-Next: Loop 5 (drag and drop)
+## Completed
+- Phase 0–4: Core functionality
+- Phase 4.5: Skylight-inspired styling
+  - Warm pastel slot colors (breakfast=peach, lunch=mint, snack=cream, dinner=lavender)
+  - AddDrawer: responsive (side panel desktop, bottom mobile), mealtime filters
+  - CookModal: floating card with Dialog, edit/delete icons, date + tags
+
+## Next: Phase 5 — Drag & Drop
+
+### Loop 5.1 Reorder within a cell
+- drag cards within a slot → updates pos
+
+### Loop 5.2 Move between days
+- drag a card to another day same slot → updates date
+
+### Loop 5.3 Move between slots (optional rules)
+- allow main ↔ main, sides ↔ sides
+- treat with guardrails
+
+Library options: @dnd-kit or react-beautiful-dnd

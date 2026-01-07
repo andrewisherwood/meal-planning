@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase";
 import type { PlanRow } from "@/app/plan/page";
 
@@ -19,6 +18,15 @@ type CookModalProps = {
   onClose: () => void;
   onDelete: () => void;
 };
+
+function formatDate(ymd: string) {
+  const date = new Date(ymd + "T00:00:00");
+  return date.toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+}
 
 export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -57,60 +65,175 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
   if (!meal) return null;
 
   return (
-    <Drawer
-      open={true}
-      onOpenChange={(isOpen) => !isOpen && onClose()}
-      dismissible={false}
-    >
-      <DrawerContent>
-        <DrawerHeader className="relative">
-          <DrawerClose
-            onClick={onClose}
-            className="absolute right-4 top-4 text-text-secondary hover:text-text-primary"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </DrawerClose>
-          <DrawerTitle>{meal.recipes?.title ?? "Recipe"}</DrawerTitle>
-          {meal.recipes?.tags?.length ? (
-            <p className="text-sm text-text-secondary mt-1">
-              {meal.recipes.tags.join(", ")}
-            </p>
-          ) : null}
-        </DrawerHeader>
+    <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent
+        className="bg-white rounded-3xl p-0 max-w-lg w-[90vw] max-h-[85vh] overflow-hidden shadow-2xl border-0"
+        showCloseButton={false}
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
+        {/* Header */}
+        <DialogHeader className="p-6 pb-4 border-b border-border">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-2xl font-semibold text-text-primary leading-tight">
+                {meal.recipes?.title ?? "Recipe"}
+              </DialogTitle>
 
-        <div className="p-4 pb-8 space-y-6 overflow-y-auto max-h-[60vh]">
+              {/* Date */}
+              <div className="flex items-center gap-2 mt-2 text-sm text-text-secondary">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                {formatDate(meal.date)}
+              </div>
+
+              {/* Tags */}
+              {meal.recipes?.tags?.length ? (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {meal.recipes.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2.5 py-1 text-xs font-medium rounded-full bg-slot-dinner-bg text-slot-dinner-border"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Action icons */}
+            <div className="flex items-center gap-1">
+              {/* Edit icon (placeholder for future) */}
+              <button
+                type="button"
+                className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+                title="Edit recipe (coming soon)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                  <path d="m15 5 4 4" />
+                </svg>
+              </button>
+
+              {/* Delete icon */}
+              <button
+                type="button"
+                onClick={onDelete}
+                className="p-2 rounded-lg text-text-muted hover:text-destructive hover:bg-error-bg transition-colors cursor-pointer"
+                title="Remove from plan"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  <line x1="10" y1="11" x2="10" y2="17" />
+                  <line x1="14" y1="11" x2="14" y2="17" />
+                </svg>
+              </button>
+
+              {/* Close icon */}
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+                title="Close"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </DialogHeader>
+
+        {/* Content */}
+        <div className="p-6 pt-4 space-y-6 overflow-y-auto max-h-[60vh]">
           {loading ? (
-            <p className="text-sm text-text-muted">Loading...</p>
+            <p className="text-sm text-text-muted py-4 text-center">Loading...</p>
           ) : (
             <>
               {/* Ingredients */}
               <section>
-                <h3 className="text-sm font-semibold text-text-primary mb-2">
-                  Ingredients
-                </h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-text-secondary"
+                  >
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                  </svg>
+                  <h3 className="text-base font-semibold text-text-primary">
+                    Ingredients
+                  </h3>
+                </div>
                 {ingredients.length > 0 ? (
-                  <ul className="space-y-1">
+                  <ul className="space-y-2 pl-1">
                     {ingredients.map((ing) => (
                       <li
                         key={ing.id}
-                        className="text-sm text-text-secondary"
+                        className="text-sm text-text-secondary leading-relaxed"
                       >
                         {ing.line}
                         {ing.optional && (
-                          <span className="text-text-muted"> (optional)</span>
+                          <span className="text-text-muted ml-1">(optional)</span>
                         )}
                       </li>
                     ))}
@@ -122,17 +245,19 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
 
               {/* Steps */}
               <section>
-                <h3 className="text-sm font-semibold text-text-primary mb-2">
+                <h3 className="text-base font-semibold text-text-primary mb-3">
                   Steps
                 </h3>
                 {steps.length > 0 ? (
-                  <ol className="space-y-3 list-decimal list-inside">
-                    {steps.map((step) => (
-                      <li
-                        key={step.id}
-                        className="text-sm text-text-secondary"
-                      >
-                        {step.text}
+                  <ol className="space-y-4">
+                    {steps.map((step, index) => (
+                      <li key={step.id} className="flex gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-slot-dinner-bg text-slot-dinner-border text-sm font-medium flex items-center justify-center">
+                          {index + 1}
+                        </span>
+                        <span className="text-sm text-text-secondary leading-relaxed pt-0.5">
+                          {step.text}
+                        </span>
                       </li>
                     ))}
                   </ol>
@@ -140,19 +265,10 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
                   <p className="text-sm text-text-muted">No steps listed</p>
                 )}
               </section>
-
-              {/* Delete action */}
-              <button
-                type="button"
-                onClick={onDelete}
-                className="w-full py-2 text-sm text-destructive hover:text-destructive/80 transition-colors cursor-pointer"
-              >
-                Remove from plan
-              </button>
             </>
           )}
         </div>
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 }

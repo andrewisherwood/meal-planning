@@ -133,7 +133,57 @@ notification shows "{recipe} added to {slot} for {day}"
 
 Stop condition: editing the plan doesn't create friction or guilt. ✅
 
-## Phase 5 — Drag & Drop (nice but later)
+## Phase 4.5 — Styling (done)
+
+Goal
+
+Skylight-inspired warm pastel UI, improved drawer/modal UX.
+
+### Loop S.1 Color system foundation (done)
+
+CSS variables for slot colors (breakfast, lunch, snack, dinner)
+
+Tailwind theme mapping
+
+### Loop S.2–S.3 Calendar pastel styling (done)
+
+WeekGrid and DayStack use per-slot colors
+
+Row backgrounds = lighter pastel, cards = darker pastel
+
+Improved border radius (rounded-xl/2xl)
+
+Better day header formatting (e.g., "Mon 7")
+
+### Loop S.4 AddDrawer responsive direction (done)
+
+Desktop (md+) = side panel from right
+
+Mobile (<md) = bottom sheet
+
+### Loop S.5–S.6 AddDrawer improvements (done)
+
+Mealtime filter buttons (All, Breakfast, Lunch, Dinner, Snack)
+
+Pre-filtered based on clicked slot
+
+Improved typography and spacing
+
+### Loop S.7 CookModal floating card (done)
+
+Replaced Drawer with Dialog component
+
+Skylight-style floating centered card (rounded-3xl)
+
+Header with edit/delete/close icons
+
+Date display and category badges
+
+Non-dismissible (click outside blocked)
+
+Stop condition: app feels warm, calm, and Skylight-inspired. ✅
+
+## Phase 5 — Drag & Drop (next)
 
 Goal
 
@@ -177,4 +227,4 @@ Stop condition: meals show up in Skylight/Google/Apple calendar without manual c
 
 UI tooling
 
-shadcn/ui installed (drawer component used for AddDrawer and CookModal).
+shadcn/ui installed (Drawer for AddDrawer, Dialog for CookModal).

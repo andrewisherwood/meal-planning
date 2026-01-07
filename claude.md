@@ -48,7 +48,7 @@ This is a **planning surface** that happens to know about food.
 - **Next.js (App Router)**
 - **Supabase** (Postgres + auth)
 - **Tailwind CSS v4** with semantic CSS variables
-- **shadcn/ui** (drawer component)
+- **shadcn/ui** (Drawer, Dialog components)
 - No heavy client state libraries
 - No premature abstractions
 
@@ -142,13 +142,15 @@ Claude should **always**:
 
 ## Current Roadmap (Looped)
 
-### Phase 0–4 ✅ Complete
+### Phase 0–4.5 ✅ Complete
 
 - Calendar grid (md+) / day stack (<md)
-- Add recipes via drawer with search
-- Cook modal with ingredients + steps
+- Add recipes via drawer with search + mealtime filters
+- Cook modal (floating card) with ingredients + steps
 - Remove from plan
 - Multi-add behaviour (drawer stays open)
+- Skylight-inspired pastel styling (per-slot colors)
+- Responsive AddDrawer (side panel desktop, bottom mobile)
 
 ### Phase 5 — Drag & Drop (next)
 
