@@ -26,6 +26,8 @@ type AddDrawerProps = {
   onClose: () => void;
   date: string;
   slot: string;
+  householdId: string;
+  onAddRecipe: (recipe: Recipe) => void;
 };
 
 function formatDate(ymd: string) {
@@ -38,7 +40,7 @@ function formatDate(ymd: string) {
   });
 }
 
-export function AddDrawer({ open, onClose, date, slot }: AddDrawerProps) {
+export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe }: AddDrawerProps) {
   const slotLabel = SLOT_LABEL[slot] ?? slot;
 
   const [query, setQuery] = useState("");
@@ -142,6 +144,7 @@ export function AddDrawer({ open, onClose, date, slot }: AddDrawerProps) {
                   <button
                     key={recipe.id}
                     type="button"
+                    onClick={() => onAddRecipe(recipe)}
                     className="w-full text-left px-3 py-2 rounded-lg border border-border bg-surface hover:bg-surface-muted transition-colors cursor-pointer"
                   >
                     <div className="font-medium text-text-primary">

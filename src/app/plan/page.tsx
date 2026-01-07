@@ -75,11 +75,19 @@ function groupPlan(rows: PlanRow[]): GroupedPlan {
 
 export type SelectedCell = { date: string; slot: string } | null;
 
+export type Recipe = {
+  id: string;
+  title: string;
+  slug: string;
+  tags: string[] | null;
+};
+
 export default function PlanPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [householdName, setHouseholdName] = useState<string>("");
+  const [householdId, setHouseholdId] = useState<string>("");
   const [selectedCell, setSelectedCell] = useState<SelectedCell>(null);
 
   useEffect(() => {
@@ -100,6 +108,7 @@ export default function PlanPage() {
       }
 
       setHouseholdName(hh.name);
+      setHouseholdId(hh.id);
 
       const start = new Date();
       const startYmd = ymd(start);
@@ -151,6 +160,44 @@ export default function PlanPage() {
 
   const grouped = useMemo(() => groupPlan(rows), [rows]);
 
+  const handleAddRecipe = async (recipe: Recipe) => {
+    if (!selectedCell) return;
+
+    // Calculate next pos for this date + slot
+    const existing = rows.filter(
+      (r) => r.date === selectedCell.date && r.meal === selectedCell.slot
+    );
+    const maxPos = existing.length > 0 ? Math.max(...existing.map((r) => r.pos)) : 0;
+    const newPos = maxPos + 1;
+
+    // Optimistic update
+    const newRow: PlanRow = {
+      id: crypto.randomUUID(),
+      date: selectedCell.date,
+      meal: selectedCell.slot,
+      pos: newPos,
+      recipe_id: recipe.id,
+      recipes: { id: recipe.id, title: recipe.title, slug: recipe.slug, tags: recipe.tags },
+      notes: null,
+    };
+    setRows([...rows, newRow]);
+    setSelectedCell(null); // Close drawer
+
+    // Persist to DB
+    const { error } = await supabase.from("meal_plan").insert({
+      household_id: householdId,
+      date: selectedCell.date,
+      meal: selectedCell.slot,
+      pos: newPos,
+      recipe_id: recipe.id,
+    });
+
+    if (error) {
+      console.error("Failed to add recipe:", error);
+      // Could revert optimistic update here if needed
+    }
+  };
+
   if (loading) {
     return <div className="p-6 text-text-secondary">Loading plan…</div>;
   }
@@ -190,6 +237,8 @@ export default function PlanPage() {
           onClose={() => setSelectedCell(null)}
           date={selectedCell.date}
           slot={selectedCell.slot}
+          householdId={householdId}
+          onAddRecipe={handleAddRecipe}
         />
       )}
     </div>
