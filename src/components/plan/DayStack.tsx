@@ -14,8 +14,8 @@ export function DayStack({ grouped }: { grouped: GroupedPlan }) {
   return (
     <div className="space-y-5">
       <div>
-        <div className="text-sm text-slate-500">Day</div>
-        <div className="text-lg font-semibold text-slate-900">{day}</div>
+        <div className="text-sm text-text-secondary">Day</div>
+        <div className="text-lg font-semibold text-text-primary">{day}</div>
       </div>
 
       {SLOT_ORDER.map((slot) => {
@@ -23,21 +23,21 @@ export function DayStack({ grouped }: { grouped: GroupedPlan }) {
 
         return (
           <section key={slot} className="space-y-2">
-            <div className="text-sm font-medium text-slate-600">{SLOT_LABEL[slot]}</div>
+            <div className="text-sm font-medium text-text-secondary">{SLOT_LABEL[slot]}</div>
 
-            <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+            <div className="rounded-xl bg-surface-muted border border-border p-3">
               <div className="flex flex-col gap-2">
                 {items.map((it) => (
                   <div
                     key={it.id}
-                    className="rounded-lg bg-white border border-slate-200 px-3 py-2 text-sm text-slate-800"
+                    className="rounded-lg bg-surface border border-border px-3 py-2 text-sm text-text-primary"
                   >
                     {it.recipes?.title ?? "Untitled"}
                   </div>
                 ))}
 
                 {items.length === 0 && (
-                  <div className="rounded-lg border border-dashed border-slate-200 bg-white px-3 py-2 text-xs text-slate-400">
+                  <div className="rounded-lg border border-dashed border-border bg-surface px-3 py-2 text-xs text-text-muted">
                     Tap to add
                   </div>
                 )}

@@ -11,14 +11,14 @@ export function WeekGrid({ grouped }: { grouped: GroupedPlan }) {
   const gridCols = `${labelCol} repeat(${dates.length}, minmax(0, 1fr))`;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+    <div className="rounded-2xl border border-border bg-surface overflow-hidden">
       <div className="grid" style={{ gridTemplateColumns: gridCols }}>
         {/* Header row (MUST be exactly 1 + dates.length cells) */}
-        <div className="border-b border-r border-slate-200 bg-slate-50" />
+        <div className="border-b border-r border-border bg-surface-muted" />
         {dates.map((d) => (
           <div
             key={d}
-            className="border-b border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700"
+            className="border-b border-border bg-surface-muted px-3 py-3 text-sm font-semibold text-text-primary"
           >
             {formatHeader(d)}
           </div>
@@ -45,8 +45,8 @@ function Row({
   return (
     <>
       {/* Row label */}
-      <div className="border-r border-b border-slate-200 bg-white px-3 py-3">
-        <div className="text-sm font-medium text-slate-700">{SLOT_LABEL[slot]}</div>
+      <div className="border-r border-b border-border bg-surface px-3 py-3">
+        <div className="text-sm font-medium text-text-primary">{SLOT_LABEL[slot]}</div>
       </div>
 
       {/* Cells */}
@@ -54,23 +54,23 @@ function Row({
         const items: PlanRow[] = grouped[date]?.[slot] ?? [];
 
         return (
-          <div key={date + slot} className="border-b border-slate-200 px-2 py-2">
-            <div className="min-h-[72px] rounded-xl bg-slate-50 p-2">
+          <div key={date + slot} className="border-b border-border px-2 py-2">
+            <div className="min-h-[72px] rounded-xl bg-surface-muted p-2">
               <div className="flex flex-col gap-2">
                 {items.map((it) => (
                   <div
                     key={it.id}
-                    className="rounded-lg bg-white border border-slate-200 px-3 py-2 text-sm text-slate-800 shadow-sm"
+                    className="rounded-lg bg-surface border border-border px-3 py-2 text-sm text-text-primary shadow-sm"
                   >
                     <div className="line-clamp-2">{it.recipes?.title ?? "Untitled"}</div>
                     {it.notes ? (
-                      <div className="mt-1 text-xs text-slate-500 line-clamp-2">{it.notes}</div>
+                      <div className="mt-1 text-xs text-text-secondary line-clamp-2">{it.notes}</div>
                     ) : null}
                   </div>
                 ))}
 
                 {items.length === 0 && (
-                  <div className="rounded-lg border border-dashed border-slate-200 bg-white px-3 py-2 text-xs text-slate-400">
+                  <div className="rounded-lg border border-dashed border-border bg-surface px-3 py-2 text-xs text-text-muted">
                     Tap to add
                   </div>
                 )}

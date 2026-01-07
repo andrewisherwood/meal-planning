@@ -132,7 +132,13 @@ export default function PlanPage() {
         return;
       }
 
-      setRows((data ?? []) as PlanRow[]);
+      // Supabase returns embedded relations as arrays; normalize to single object
+      const normalized: PlanRow[] = (data ?? []).map((row) => ({
+        ...row,
+        recipes: Array.isArray(row.recipes) ? row.recipes[0] ?? null : row.recipes,
+      }));
+
+      setRows(normalized);
       setLoading(false);
     };
 
@@ -142,14 +148,14 @@ export default function PlanPage() {
   const grouped = useMemo(() => groupPlan(rows), [rows]);
 
   if (loading) {
-    return <div className="p-6 text-slate-600">Loading plan…</div>;
+    return <div className="p-6 text-text-secondary">Loading plan…</div>;
   }
 
   if (error) {
     return (
       <div className="p-6">
-        <h1 className="text-lg font-semibold text-slate-900 mb-2">Plan</h1>
-        <pre className="whitespace-pre-wrap text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+        <h1 className="text-lg font-semibold text-text-primary mb-2">Plan</h1>
+        <pre className="whitespace-pre-wrap text-sm text-error bg-error-bg border border-error-border rounded-lg p-3">
           {error}
         </pre>
       </div>
@@ -159,8 +165,8 @@ export default function PlanPage() {
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <div className="mb-4">
-        <h1 className="text-2xl font-semibold text-slate-900">Meal Plan</h1>
-        <div className="text-sm text-slate-500">{householdName}</div>
+        <h1 className="text-2xl font-semibold text-text-primary">Meal Plan</h1>
+        <div className="text-sm text-text-secondary">{householdName}</div>
       </div>
 
       {/* md+ → Week grid (planning) */}
