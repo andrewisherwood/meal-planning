@@ -183,7 +183,11 @@ export default function PlanPage() {
       notes: null,
     };
     setRows([...rows, newRow]);
-    setSelectedCell(null); // Close drawer
+
+    // Only auto-close for dinner:main (other slots stay open for adding multiple items)
+    if (selectedCell.slot === "dinner:main") {
+      setSelectedCell(null);
+    }
 
     // Persist to DB
     const { error } = await supabase.from("meal_plan").insert({

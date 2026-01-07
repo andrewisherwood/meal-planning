@@ -40,12 +40,31 @@ function formatDate(ymd: string) {
   });
 }
 
+function getDayName(ymd: string) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString("en-GB", { weekday: "long" });
+}
+
 export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe }: AddDrawerProps) {
   const slotLabel = SLOT_LABEL[slot] ?? slot;
 
   const [query, setQuery] = useState("");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
+
+  // Clear notification after 1.5 seconds
+  useEffect(() => {
+    if (!notification) return;
+    const timeout = setTimeout(() => setNotification(null), 1500);
+    return () => clearTimeout(timeout);
+  }, [notification]);
+
+  const handleAdd = (recipe: Recipe) => {
+    setNotification(`${recipe.title} added to ${slotLabel} for ${getDayName(date)}`);
+    onAddRecipe(recipe);
+  };
 
   // Fetch recipes on mount and when query changes (debounced)
   useEffect(() => {
@@ -90,6 +109,7 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
     if (!open) {
       setQuery("");
       setRecipes([]);
+      setNotification(null);
     }
   }, [open]);
 
@@ -118,6 +138,13 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
         </DrawerHeader>
 
         <div className="p-4 pb-8 space-y-4">
+          {/* Notification */}
+          {notification && (
+            <div className="px-3 py-2 rounded-lg bg-surface-muted border border-border text-sm text-text-secondary">
+              {notification}
+            </div>
+          )}
+
           {/* Search input */}
           <input
             type="text"
@@ -144,7 +171,7 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
                   <button
                     key={recipe.id}
                     type="button"
-                    onClick={() => onAddRecipe(recipe)}
+                    onClick={() => handleAdd(recipe)}
                     className="w-full text-left px-3 py-2 rounded-lg border border-border bg-surface hover:bg-surface-muted transition-colors cursor-pointer"
                   >
                     <div className="font-medium text-text-primary">
