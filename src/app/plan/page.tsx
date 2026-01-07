@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { WeekGrid } from "@/components/plan/WeekGrid";
 import { DayStack } from "@/components/plan/DayStack";
+import { AddDrawer } from "@/components/plan/AddDrawer";
 
 export type JoinedRecipe = {
   id: string;
@@ -72,11 +73,14 @@ function groupPlan(rows: PlanRow[]): GroupedPlan {
   return byDate;
 }
 
+export type SelectedCell = { date: string; slot: string } | null;
+
 export default function PlanPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [householdName, setHouseholdName] = useState<string>("");
+  const [selectedCell, setSelectedCell] = useState<SelectedCell>(null);
 
   useEffect(() => {
     const run = async () => {
@@ -171,13 +175,23 @@ export default function PlanPage() {
 
       {/* md+ → Week grid (planning) */}
       <div className="hidden md:block">
-        <WeekGrid grouped={grouped} />
+        <WeekGrid grouped={grouped} onCellClick={setSelectedCell} />
       </div>
 
       {/* <md → Day stack (checking) */}
       <div className="md:hidden">
-        <DayStack grouped={grouped} />
+        <DayStack grouped={grouped} onCellClick={setSelectedCell} />
       </div>
+
+      {/* Add drawer */}
+      {selectedCell && (
+        <AddDrawer
+          open={true}
+          onClose={() => setSelectedCell(null)}
+          date={selectedCell.date}
+          slot={selectedCell.slot}
+        />
+      )}
     </div>
   );
 }

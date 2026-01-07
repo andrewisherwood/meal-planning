@@ -1,13 +1,18 @@
-import type { GroupedPlan, PlanRow } from "@/app/plan/page";
+import type { GroupedPlan, PlanRow, SelectedCell } from "@/app/plan/page";
 import { SLOT_LABEL, SLOT_ORDER } from "@/app/plan/page";
 
 function pickDefaultDay(grouped: GroupedPlan) {
   // For Loop 1, pick the earliest day in the loaded range.
-  // Later we’ll choose "today" if present and add a date picker.
+  // Later we'll choose "today" if present and add a date picker.
   return Object.keys(grouped).sort()[0];
 }
 
-export function DayStack({ grouped }: { grouped: GroupedPlan }) {
+type DayStackProps = {
+  grouped: GroupedPlan;
+  onCellClick: (cell: SelectedCell) => void;
+};
+
+export function DayStack({ grouped, onCellClick }: DayStackProps) {
   const day = pickDefaultDay(grouped);
   const slots = grouped[day] ?? {};
 
@@ -36,11 +41,13 @@ export function DayStack({ grouped }: { grouped: GroupedPlan }) {
                   </div>
                 ))}
 
-                {items.length === 0 && (
-                  <div className="rounded-lg border border-dashed border-border bg-surface px-3 py-2 text-xs text-text-muted">
-                    Tap to add
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={() => onCellClick({ date: day, slot })}
+                  className="rounded-lg border border-dashed border-border bg-surface px-3 py-2 text-xs text-text-muted hover:bg-surface-muted hover:border-text-muted transition-colors cursor-pointer"
+                >
+                  Tap to add
+                </button>
               </div>
             </div>
           </section>

@@ -1,11 +1,16 @@
-import type { GroupedPlan, PlanRow } from "@/app/plan/page";
+import type { GroupedPlan, PlanRow, SelectedCell } from "@/app/plan/page";
 import { SLOT_LABEL, SLOT_ORDER } from "@/app/plan/page";
 
 function formatHeader(ymd: string) {
   return ymd;
 }
 
-export function WeekGrid({ grouped }: { grouped: GroupedPlan }) {
+type WeekGridProps = {
+  grouped: GroupedPlan;
+  onCellClick: (cell: SelectedCell) => void;
+};
+
+export function WeekGrid({ grouped, onCellClick }: WeekGridProps) {
   const dates = Object.keys(grouped).sort();
   const labelCol = "160px";
   const gridCols = `${labelCol} repeat(${dates.length}, minmax(0, 1fr))`;
@@ -26,7 +31,7 @@ export function WeekGrid({ grouped }: { grouped: GroupedPlan }) {
 
         {/* Body rows */}
         {SLOT_ORDER.map((slot) => (
-          <Row key={slot} slot={slot} dates={dates} grouped={grouped} />
+          <Row key={slot} slot={slot} dates={dates} grouped={grouped} onCellClick={onCellClick} />
         ))}
       </div>
     </div>
@@ -37,10 +42,12 @@ function Row({
   slot,
   dates,
   grouped,
+  onCellClick,
 }: {
   slot: (typeof SLOT_ORDER)[number];
   dates: string[];
   grouped: GroupedPlan;
+  onCellClick: (cell: SelectedCell) => void;
 }) {
   return (
     <>
@@ -69,11 +76,13 @@ function Row({
                   </div>
                 ))}
 
-                {items.length === 0 && (
-                  <div className="rounded-lg border border-dashed border-border bg-surface px-3 py-2 text-xs text-text-muted">
-                    Tap to add
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={() => onCellClick({ date, slot })}
+                  className="rounded-lg border border-dashed border-border bg-surface px-3 py-2 text-xs text-text-muted hover:bg-surface-muted hover:border-text-muted transition-colors cursor-pointer"
+                >
+                  Tap to add
+                </button>
               </div>
             </div>
           </div>
