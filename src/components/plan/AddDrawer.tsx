@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Drawer,
   DrawerClose,
@@ -9,6 +10,16 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { SLOT_LABEL } from "@/app/plan/page";
+import { supabase } from "@/lib/supabase";
+
+type Recipe = {
+  id: string;
+  title: string;
+  slug: string;
+  prep_minutes: number | null;
+  cook_minutes: number | null;
+  tags: string[] | null;
+};
 
 type AddDrawerProps = {
   open: boolean;
@@ -29,6 +40,56 @@ function formatDate(ymd: string) {
 
 export function AddDrawer({ open, onClose, date, slot }: AddDrawerProps) {
   const slotLabel = SLOT_LABEL[slot] ?? slot;
+
+  const [query, setQuery] = useState("");
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch recipes on mount and when query changes (debounced)
+  useEffect(() => {
+    if (!open) return;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(async () => {
+      setLoading(true);
+
+      let request = supabase
+        .from("recipes")
+        .select("id,title,slug,prep_minutes,cook_minutes,tags")
+        .limit(10);
+
+      if (query.trim()) {
+        request = request.ilike("title", `%${query.trim()}%`).order("title");
+      } else {
+        request = request.order("created_at", { ascending: false });
+      }
+
+      const { data, error } = await request;
+
+      if (!controller.signal.aborted) {
+        if (error) {
+          console.error("Recipe search error:", error);
+          setRecipes([]);
+        } else {
+          setRecipes(data ?? []);
+        }
+        setLoading(false);
+      }
+    }, query ? 300 : 0); // Debounce only when searching
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
+  }, [open, query]);
+
+  // Reset state when drawer closes
+  useEffect(() => {
+    if (!open) {
+      setQuery("");
+      setRecipes([]);
+    }
+  }, [open]);
 
   return (
     <Drawer open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -54,10 +115,46 @@ export function AddDrawer({ open, onClose, date, slot }: AddDrawerProps) {
           <DrawerDescription>{formatDate(date)}</DrawerDescription>
         </DrawerHeader>
 
-        <div className="p-4 pb-8">
-          {/* Loop 2.2 will add search here */}
-          <div className="rounded-lg border border-dashed border-border bg-surface-muted p-6 text-center text-sm text-text-muted">
-            Recipe search coming in Loop 2.2
+        <div className="p-4 pb-8 space-y-4">
+          {/* Search input */}
+          <input
+            type="text"
+            placeholder="Search recipes..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+
+          {/* Results list */}
+          <div className="space-y-2">
+            {loading ? (
+              <div className="text-center text-sm text-text-muted py-4">
+                Loading...
+              </div>
+            ) : recipes.length === 0 ? (
+              <div className="text-center text-sm text-text-muted py-4">
+                {query ? "No recipes found" : "No recipes yet"}
+              </div>
+            ) : (
+              recipes.map((recipe) => {
+                const total = (recipe.prep_minutes ?? 0) + (recipe.cook_minutes ?? 0);
+                return (
+                  <button
+                    key={recipe.id}
+                    type="button"
+                    className="w-full text-left px-3 py-2 rounded-lg border border-border bg-surface hover:bg-surface-muted transition-colors cursor-pointer"
+                  >
+                    <div className="font-medium text-text-primary">
+                      {recipe.title}
+                    </div>
+                    <div className="text-sm text-text-secondary">
+                      {total ? `${total} min` : "—"}
+                      {recipe.tags?.length ? ` · ${recipe.tags.join(", ")}` : ""}
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
       </DrawerContent>
