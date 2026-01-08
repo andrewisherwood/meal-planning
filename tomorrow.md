@@ -10,12 +10,13 @@ git pull --rebase
 
 Goal: Polish the app structure before adding new features.
 
-### Loop 6.5.1 Recipes as Home
+### Loop 6.5.1 Homepage
 
-Currently `/` is a placeholder and `/r` shows recipes. Make recipes the true home:
-- `/` → Recipe browser (current `/r` page)
-- Remove or redirect old `/` route
-- Update any hardcoded links
+Create a proper landing page describing the app:
+- `/` → Marketing homepage with sections describing the app
+- `/recipes` → Recipe browser (move current `/` content here)
+- `/r/[slug]` → Individual recipes (keep as-is)
+- User has copy ready for the homepage
 
 ### Loop 6.5.2 Consistent Navigation
 

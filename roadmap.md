@@ -218,6 +218,7 @@ date field updates on drop
 ### Loop 5.5 Move between slots with guardrails (done)
 
 canMoveToSlot() helper enforces rules:
+
 - same slot type always allowed
 - dinner sub-slots can interchange
 - other cross-slot moves blocked
@@ -308,11 +309,13 @@ Goal
 
 Polish app structure before adding features.
 
-### Loop 6.5.1 Recipes as home
+### Loop 6.5.1 Homepage
 
-Make `/` show recipes (currently `/r`)
+Create landing page at `/` with marketing copy
 
-Recipes are the natural entry point
+Move recipe browser from `/` to `/recipes`
+
+Keep `/r/[slug]` for individual recipes
 
 ### Loop 6.5.2 Consistent navigation
 

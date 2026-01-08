@@ -173,7 +173,7 @@ Claude should **always**:
 
 ### Phase 6.5 — Navigation & UX Refinements (next)
 
-- Recipes as home (`/` instead of `/r`)
+- Homepage at `/` with marketing copy (move recipes to `/recipes`)
 - Consistent nav across site (Recipes, Plan, Settings)
 - Full week calendar with today indicator and week navigation
 
