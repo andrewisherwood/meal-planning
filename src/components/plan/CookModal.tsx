@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import type { PlanRow } from "@/app/plan/page";
 
 type Ingredient = { id: string; line: string; optional: boolean };
@@ -42,6 +42,7 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
 
     const fetchDetails = async () => {
       setLoading(true);
+      const supabase = createClient();
       const [{ data: ing }, { data: stp }] = await Promise.all([
         supabase
           .from("recipe_ingredients")

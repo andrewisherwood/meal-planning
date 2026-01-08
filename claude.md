@@ -141,6 +141,11 @@ Claude should **always**:
    - Do not rename tables casually
    - Do not introduce new patterns without reason
 
+6. Use the **PR workflow** for features
+   - See `CONTRIBUTING.md` for branch naming and PR process
+   - Feature branches: `feature/`, `fix/`, `chore/`
+   - Use `scripts/git-workflow.sh` helpers
+
 ---
 
 ## Current Roadmap (Looped)
@@ -157,13 +162,14 @@ Claude should **always**:
 - Drag & drop (reorder, move between days/slots)
 - Mobile day navigation tabs
 
-### Phase 6 — Auth & Households (next)
+### Phase 6 ✅ Complete
 
-- Supabase Auth (email/magic link)
+- Supabase Auth (magic link / passwordless)
 - Household creation + invite codes
-- RLS policies for data isolation
-- Protected routes
+- RLS policies for data isolation (all 6 tables)
+- Protected routes via middleware
 - User settings page
+- Vitest test infrastructure
 
 ### Phase 7+ — Future
 

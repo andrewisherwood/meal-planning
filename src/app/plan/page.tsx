@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, PointerSensor, TouchSensor, useSensors, useSensor } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { WeekGrid } from "@/components/plan/WeekGrid";
 import { DayStack } from "@/components/plan/DayStack";
 import { AddDrawer } from "@/components/plan/AddDrawer";
@@ -156,6 +157,7 @@ export default function PlanPage() {
       setRows(finalRows);
 
       // Persist: update the moved item
+      const supabase = createClient();
       const { error } = await supabase
         .from("meal_plan")
         .update({ date: targetDate, meal: targetSlot, pos: newPos })
@@ -215,6 +217,7 @@ export default function PlanPage() {
     setRows([...otherRows, ...updatedSlotItems]);
 
     // Persist to DB - batch update pos values
+    const supabase = createClient();
     for (const item of updatedSlotItems) {
       const { error } = await supabase
         .from("meal_plan")
@@ -232,14 +235,16 @@ export default function PlanPage() {
       setLoading(true);
       setError(null);
 
+      const supabase = createClient();
+
+      // Get user's household (RLS ensures we only see our own)
       const { data: hh, error: hhErr } = await supabase
         .from("households")
         .select("id,name")
-        .eq("slug", "isherwood")
         .single();
 
       if (hhErr) {
-        setError(`Household lookup failed: ${hhErr.message}`);
+        setError(`Household lookup failed: ${hhErr.message}. Please complete onboarding.`);
         setLoading(false);
         return;
       }
@@ -251,6 +256,7 @@ export default function PlanPage() {
       const startYmd = ymd(start);
       const endYmd = ymd(addDays(start, 6));
 
+      // RLS automatically filters to user's household
       const { data, error: planErr } = await supabase
         .from("meal_plan")
         .select(
@@ -269,7 +275,6 @@ export default function PlanPage() {
           )
         `
         )
-        .eq("household_id", hh.id)
         .gte("date", startYmd)
         .lte("date", endYmd)
         .order("date", { ascending: true })
@@ -331,6 +336,7 @@ export default function PlanPage() {
     }
 
     // Persist to DB
+    const supabase = createClient();
     const { error } = await supabase.from("meal_plan").insert({
       household_id: householdId,
       date: selectedCell.date,
@@ -353,6 +359,7 @@ export default function PlanPage() {
     setSelectedMeal(null);
 
     // Persist to DB
+    const supabase = createClient();
     const { error } = await supabase
       .from("meal_plan")
       .delete()
@@ -381,9 +388,31 @@ export default function PlanPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
-      <div className="mb-4">
-        <h1 className="text-2xl font-semibold text-text-primary">Meal Plan</h1>
-        <div className="text-sm text-text-secondary">{householdName}</div>
+      <div className="mb-4 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-text-primary">Meal Plan</h1>
+          <div className="text-sm text-text-secondary">{householdName}</div>
+        </div>
+        <Link
+          href="/settings"
+          className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors"
+          title="Settings"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </Link>
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>

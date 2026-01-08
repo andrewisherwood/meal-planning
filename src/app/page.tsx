@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
+  const supabase = await createClient();
   const { data: recipes } = await supabase
     .from("recipes")
     .select("id,title,slug,prep_minutes,cook_minutes,tags")

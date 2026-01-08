@@ -10,7 +10,7 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { SLOT_LABEL } from "@/app/plan/page";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 
 // Hook to detect desktop breakpoint (md = 768px)
 function useIsDesktop() {
@@ -105,6 +105,7 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
     const timeoutId = setTimeout(async () => {
       setLoading(true);
 
+      const supabase = createClient();
       let request = supabase
         .from("recipes")
         .select("id,title,slug,prep_minutes,cook_minutes,tags")
