@@ -3,47 +3,39 @@ git pull --rebase
 
 ## Completed
 
-- Phase 0–4: Core functionality
-- Phase 4.5: Skylight-inspired styling
-- Phase 5: Drag & Drop (with bug fixes)
+- Phase 0–5: Core functionality (grid, recipes, cook modal, drag-drop)
+- Phase 6: Auth & Households (magic link, RLS, protected routes)
 
-## Next: Phase 6 — Auth & Households
+## Next: Phase 6.5 — Navigation & UX Refinements
 
-Goal: Your family can sign up and use this for real.
+Goal: Polish the app structure before adding new features.
 
-### Loop 6.1 Supabase Auth setup
-- Enable auth in Supabase project
-- Email/magic link authentication
+### Loop 6.5.1 Recipes as Home
 
-### Loop 6.2 Sign up / sign in pages
-- /login and /signup routes
-- Form validation, error handling
+Currently `/` is a placeholder and `/r` shows recipes. Make recipes the true home:
+- `/` → Recipe browser (current `/r` page)
+- Remove or redirect old `/` route
+- Update any hardcoded links
 
-### Loop 6.3 Household creation
-- First user creates household, gets invite code
-- Store household settings (name, Skylight email)
+### Loop 6.5.2 Consistent Navigation
 
-### Loop 6.4 Join household flow
-- Enter invite code to join existing household
+Add a unified nav bar/header across the site:
+- Recipes link (home)
+- Plan link
+- Settings icon
+- Current page indicator
+- Works on mobile and desktop
 
-### Loop 6.5 User profile & settings page
-- View/edit name, email
-- Household settings
+### Loop 6.5.3 Full Week Calendar
 
-### Loop 6.6 Database Migration - RLS
-- Enable RLS on all tables
-- Add household_id to recipes (NULL = shared, non-null = private)
-- Create RLS policies for data isolation
+Change plan view from "rolling 7 days" to "full week":
+- Show Mon–Sun (or Sun–Sat based on locale)
+- Highlight today with visual indicator
+- Week navigation (prev/next week buttons)
+- "Today" button to jump back to current week
+- Remember: mobile still uses day stack with day tabs
 
-### Loop 6.7 Protected routes
-- Redirect to login if not authenticated
-- Replace hardcoded "isherwood" with user's actual household
-
-### Loop 6.8 User profile & settings
-- Settings page with Skylight email (for Phase 7)
-- Sign out button
-
-Stop condition: family members can create accounts and see their shared plan.
+Stop condition: Navigation feels complete and professional.
 
 ## Upcoming
 

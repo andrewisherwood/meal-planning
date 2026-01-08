@@ -171,6 +171,12 @@ Claude should **always**:
 - User settings page
 - Vitest test infrastructure
 
+### Phase 6.5 — Navigation & UX Refinements (next)
+
+- Recipes as home (`/` instead of `/r`)
+- Consistent nav across site (Recipes, Plan, Settings)
+- Full week calendar with today indicator and week navigation
+
 ### Phase 7+ — Future
 
 - Calendar Export (ICS feed, Skylight integration)

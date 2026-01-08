@@ -238,49 +238,97 @@ touch-friendly with TouchSensor
 
 Stop condition: planning is fast and satisfying. ✅
 
-## Phase 6 — Auth & Households (next)
+## Phase 6 — Auth & Households (done)
 
 Goal
 
 Your family can sign up and use this for real.
 
-### Loop 6.1 Supabase Auth setup
+### Loop 6.0 Vitest setup (done)
 
-Enable auth in Supabase project
+Test infrastructure with jsdom environment
 
-Email/magic link authentication
+### Loop 6.1–6.2 Supabase Auth & SSR clients (done)
 
-### Loop 6.2 Sign up / sign in pages
+@supabase/ssr for browser + server clients
 
-/login and /signup routes
+Middleware for session refresh
 
-Form validation, error handling
+### Loop 6.3 Database schema changes (done)
 
-### Loop 6.3 Household creation
+user_id on household_members
 
-First user creates household, gets invite code
+invite_code on households
 
-Store household settings (name, Skylight email)
+get_user_household_id() helper function
 
-### Loop 6.4 Join household flow
+### Loop 6.4 RLS policies (done)
 
-Enter invite code to join existing household
+Enabled on all 6 tables
 
-Link user to household in DB
+Policies for SELECT/INSERT/UPDATE/DELETE
 
-### Loop 6.5 User profile & settings page
+### Loop 6.5 Login & auth callback (done)
 
-View/edit name, email
+Magic link (passwordless email)
 
-Household settings (Skylight email address for Phase 7)
+PKCE code exchange
 
-### Loop 6.6 Protected routes
+### Loop 6.6 Onboarding flow (done)
 
-Redirect to login if not authenticated
+Create household OR join with invite code
 
-Replace hardcoded "isherwood" with user's actual household
+### Loop 6.7 Middleware & protected routes (done)
 
-Stop condition: family members can create accounts and see their shared plan.
+/plan, /settings, /onboarding require auth
+
+### Loop 6.8 Settings page (done)
+
+User info, household, members list
+
+Invite code with copy button
+
+Sign out
+
+### Loop 6.9 RLS verification tests (done)
+
+Vitest tests documenting expected RLS behavior
+
+### Loop 6.10 Link existing data (done)
+
+Helper script for migrating dev data
+
+Stop condition: family members can create accounts and see their shared plan. ✅
+
+---
+
+## Phase 6.5 — Navigation & UX Refinements (next)
+
+Goal
+
+Polish app structure before adding features.
+
+### Loop 6.5.1 Recipes as home
+
+Make `/` show recipes (currently `/r`)
+
+Recipes are the natural entry point
+
+### Loop 6.5.2 Consistent navigation
+
+Unified nav across site (Recipes, Plan, Settings)
+
+Works on mobile and desktop
+
+### Loop 6.5.3 Full week calendar
+
+Show Mon–Sun instead of rolling 7 days
+
+Today indicator
+
+Week navigation (prev/next/today)
+
+Stop condition: navigation feels complete and professional.
 
 ---
 
