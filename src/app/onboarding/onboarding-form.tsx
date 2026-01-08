@@ -33,16 +33,18 @@ export function OnboardingForm({ userId }: { userId: string }) {
 
     const supabase = createClient()
 
+    // Generate ID client-side to avoid needing RETURNING (which triggers SELECT policy)
+    const householdId = crypto.randomUUID()
+
     // Create household
-    const { data: household, error: hhErr } = await supabase
+    const { error: hhErr } = await supabase
       .from('households')
       .insert({
+        id: householdId,
         name: householdName,
         slug: slugify(householdName) + '-' + Date.now().toString(36),
         invite_code: generateInviteCode(),
       })
-      .select('id')
-      .single()
 
     if (hhErr) {
       setError(hhErr.message)
@@ -54,7 +56,7 @@ export function OnboardingForm({ userId }: { userId: string }) {
     const { error: memErr } = await supabase
       .from('household_members')
       .insert({
-        household_id: household.id,
+        household_id: householdId,
         user_id: userId,
         name: memberName,
         role: 'parent',
@@ -76,14 +78,11 @@ export function OnboardingForm({ userId }: { userId: string }) {
 
     const supabase = createClient()
 
-    // Find household by invite code
-    const { data: household, error: hhErr } = await supabase
-      .from('households')
-      .select('id')
-      .eq('invite_code', inviteCode.toUpperCase().trim())
-      .maybeSingle()
+    // Find household by invite code using RPC function (bypasses RLS)
+    const { data: householdId, error: hhErr } = await supabase
+      .rpc('get_household_id_by_invite_code', { code: inviteCode.trim() })
 
-    if (hhErr || !household) {
+    if (hhErr || !householdId) {
       setError('Invalid invite code')
       setLoading(false)
       return
@@ -93,7 +92,7 @@ export function OnboardingForm({ userId }: { userId: string }) {
     const { error: memErr } = await supabase
       .from('household_members')
       .insert({
-        household_id: household.id,
+        household_id: householdId,
         user_id: userId,
         name: joinName,
         role: 'parent',
