@@ -57,6 +57,22 @@ function addDays(d: Date, days: number) {
   return out;
 }
 
+function getMonday(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust if Sunday
+  return new Date(d.setDate(diff));
+}
+
+function formatWeekRange(startYmd: string, endYmd: string): string {
+  const start = new Date(startYmd + "T00:00:00");
+  const end = new Date(endYmd + "T00:00:00");
+  const opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
+  const startStr = start.toLocaleDateString("en-GB", opts);
+  const endStr = end.toLocaleDateString("en-GB", { ...opts, year: "numeric" });
+  return `${startStr} – ${endStr}`;
+}
+
 export type GroupedPlan = Record<string, Record<string, PlanRow[]>>;
 
 function groupPlan(rows: PlanRow[]): GroupedPlan {
@@ -94,6 +110,18 @@ export default function PlanPage() {
   const [selectedCell, setSelectedCell] = useState<SelectedCell>(null);
   const [selectedMeal, setSelectedMeal] = useState<PlanRow | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  // Today's date for highlighting
+  const todayYmd = useMemo(() => ymd(new Date()), []);
+
+  // Calculate week dates (Mon-Sun) based on offset
+  const weekDates = useMemo(() => {
+    const today = new Date();
+    const monday = getMonday(today);
+    const startOfWeek = addDays(monday, weekOffset * 7);
+    return Array.from({ length: 7 }, (_, i) => ymd(addDays(startOfWeek, i)));
+  }, [weekOffset]);
 
   // Drag-and-drop sensors (pointer for desktop, touch for mobile)
   const sensors = useSensors(
@@ -251,9 +279,9 @@ export default function PlanPage() {
       setHouseholdName(hh.name);
       setHouseholdId(hh.id);
 
-      const start = new Date();
-      const startYmd = ymd(start);
-      const endYmd = ymd(addDays(start, 6));
+      // Use weekDates for the date range query
+      const startYmd = weekDates[0];
+      const endYmd = weekDates[6];
 
       // RLS automatically filters to user's household
       const { data, error: planErr } = await supabase
@@ -297,15 +325,9 @@ export default function PlanPage() {
     };
 
     run();
-  }, []);
+  }, [weekDates]);
 
   const grouped = useMemo(() => groupPlan(rows), [rows]);
-
-  // Generate all 7 days starting from today (ensures empty days show in grid)
-  const weekDates = useMemo(() => {
-    const start = new Date();
-    return Array.from({ length: 7 }, (_, i) => ymd(addDays(start, i)));
-  }, []);
 
   const handleAddRecipe = async (recipe: Recipe) => {
     if (!selectedCell) return;
@@ -387,15 +409,81 @@ export default function PlanPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      {/* Week navigation - desktop */}
+      <div className="hidden md:flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setWeekOffset((w) => w - 1)}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+          >
+            ← Prev
+          </button>
+          <button
+            type="button"
+            onClick={() => setWeekOffset(0)}
+            disabled={weekOffset === 0}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default"
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={() => setWeekOffset((w) => w + 1)}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+          >
+            Next →
+          </button>
+        </div>
+        <span className="text-sm text-text-secondary">
+          {formatWeekRange(weekDates[0], weekDates[6])}
+        </span>
+      </div>
+
+      {/* Week navigation - mobile */}
+      <div className="flex md:hidden items-center justify-between mb-4">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setWeekOffset((w) => w - 1)}
+            className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => setWeekOffset(0)}
+            disabled={weekOffset === 0}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default"
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={() => setWeekOffset((w) => w + 1)}
+            className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </button>
+        </div>
+        <span className="text-sm text-text-secondary">
+          {formatWeekRange(weekDates[0], weekDates[6])}
+        </span>
+      </div>
+
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* md+ → Week grid (planning) */}
         <div className="hidden md:block">
-          <WeekGrid dates={weekDates} grouped={grouped} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
+          <WeekGrid dates={weekDates} grouped={grouped} today={todayYmd} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
         </div>
 
         {/* <md → Day stack (checking) */}
         <div className="md:hidden">
-          <DayStack dates={weekDates} grouped={grouped} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
+          <DayStack dates={weekDates} grouped={grouped} today={todayYmd} onCellClick={setSelectedCell} onMealClick={setSelectedMeal} />
         </div>
 
         {/* Drag overlay - ghost card that follows cursor */}
