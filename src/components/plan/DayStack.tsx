@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { GroupedPlan, PlanRow, SelectedCell } from "@/app/(authenticated)/plan/page";
 import { SLOT_LABEL, SLOT_ORDER } from "@/app/(authenticated)/plan/page";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -118,12 +118,22 @@ function SortableCard({
 type DayStackProps = {
   dates: string[];
   grouped: GroupedPlan;
+  today: string;
   onCellClick: (cell: SelectedCell) => void;
   onMealClick: (meal: PlanRow) => void;
 };
 
-export function DayStack({ dates, grouped, onCellClick, onMealClick }: DayStackProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+export function DayStack({ dates, grouped, today, onCellClick, onMealClick }: DayStackProps) {
+  // Find today's index in the current week (if visible)
+  const todayIndex = dates.indexOf(today);
+  const [selectedIndex, setSelectedIndex] = useState(todayIndex >= 0 ? todayIndex : 0);
+
+  // Reset to today's tab when week changes (or Monday if today not in week)
+  useEffect(() => {
+    const newTodayIndex = dates.indexOf(today);
+    setSelectedIndex(newTodayIndex >= 0 ? newTodayIndex : 0);
+  }, [dates, today]);
+
   const day = dates[selectedIndex] ?? dates[0];
   const slots = grouped[day] ?? {};
 
@@ -131,20 +141,29 @@ export function DayStack({ dates, grouped, onCellClick, onMealClick }: DayStackP
     <div className="space-y-4">
       {/* Day tabs - horizontal scroll */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-        {dates.map((d, i) => (
-          <button
-            key={d}
-            type="button"
-            onClick={() => setSelectedIndex(i)}
-            className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              i === selectedIndex
-                ? "bg-text-primary text-white"
-                : "bg-surface-muted text-text-secondary hover:bg-surface-muted/80"
-            }`}
-          >
-            {formatDayShort(d)}
-          </button>
-        ))}
+        {dates.map((d, i) => {
+          const isToday = d === today;
+          const isSelected = i === selectedIndex;
+          return (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setSelectedIndex(i)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                isSelected
+                  ? "bg-text-primary text-white"
+                  : isToday
+                  ? "bg-brand-accent/20 text-brand-primary ring-1 ring-brand-primary/30"
+                  : "bg-surface-muted text-text-secondary hover:bg-surface-muted/80"
+              }`}
+            >
+              {formatDayShort(d)}
+              {isToday && !isSelected && (
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Current day header */}

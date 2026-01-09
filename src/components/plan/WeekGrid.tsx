@@ -48,11 +48,12 @@ function formatHeader(ymd: string) {
 type WeekGridProps = {
   dates: string[];
   grouped: GroupedPlan;
+  today: string;
   onCellClick: (cell: SelectedCell) => void;
   onMealClick: (meal: PlanRow) => void;
 };
 
-export function WeekGrid({ dates, grouped, onCellClick, onMealClick }: WeekGridProps) {
+export function WeekGrid({ dates, grouped, today, onCellClick, onMealClick }: WeekGridProps) {
   const labelCol = "160px";
   const gridCols = `${labelCol} repeat(${dates.length}, minmax(0, 1fr))`;
 
@@ -61,14 +62,26 @@ export function WeekGrid({ dates, grouped, onCellClick, onMealClick }: WeekGridP
       <div className="grid" style={{ gridTemplateColumns: gridCols }}>
         {/* Header row (MUST be exactly 1 + dates.length cells) */}
         <div className="border-b border-r border-border bg-surface-muted" />
-        {dates.map((d) => (
-          <div
-            key={d}
-            className="border-b border-border bg-surface-muted px-3 py-3 text-sm font-semibold text-text-primary"
-          >
-            {formatHeader(d)}
-          </div>
-        ))}
+        {dates.map((d) => {
+          const isToday = d === today;
+          return (
+            <div
+              key={d}
+              className={`border-b border-border px-3 py-3 text-sm font-semibold ${
+                isToday
+                  ? "bg-brand-accent/20 text-brand-primary"
+                  : "bg-surface-muted text-text-primary"
+              }`}
+            >
+              <span className={isToday ? "inline-flex items-center gap-1.5" : ""}>
+                {formatHeader(d)}
+                {isToday && (
+                  <span className="inline-block w-2 h-2 rounded-full bg-brand-primary" />
+                )}
+              </span>
+            </div>
+          );
+        })}
 
         {/* Body rows */}
         {SLOT_ORDER.map((slot) => (
