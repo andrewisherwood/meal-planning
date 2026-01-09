@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { createClient } from "@/lib/supabase/client";
-import type { PlanRow } from "@/app/plan/page";
+import type { PlanRow } from "@/app/(authenticated)/plan/page";
 
 type Ingredient = { id: string; line: string; optional: boolean };
 type Step = { id: string; step_no: number; text: string };

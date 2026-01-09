@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from './sign-out-button'
 import { InviteCode } from './invite-code'
@@ -39,15 +38,7 @@ export default async function SettingsPage() {
 
   return (
     <main className="p-4 md:p-6 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Settings</h1>
-        <Link
-          href="/plan"
-          className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-        >
-          &larr; Back to plan
-        </Link>
-      </div>
+      <h1 className="text-2xl font-semibold text-text-primary mb-6">Settings</h1>
 
       <section className="mb-8">
         <h2 className="text-lg font-medium text-[var(--text-primary)] mb-3">Your Account</h2>
