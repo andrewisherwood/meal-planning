@@ -9,7 +9,7 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/ui/drawer";
-import { SLOT_LABEL } from "@/app/plan/page";
+import { SLOT_LABEL } from "@/app/(authenticated)/plan/page";
 import { createClient } from "@/lib/supabase/client";
 
 // Hook to detect desktop breakpoint (md = 768px)

@@ -1,5 +1,5 @@
-import type { GroupedPlan, PlanRow, SelectedCell } from "@/app/plan/page";
-import { SLOT_LABEL, SLOT_ORDER } from "@/app/plan/page";
+import type { GroupedPlan, PlanRow, SelectedCell } from "@/app/(authenticated)/plan/page";
+import { SLOT_LABEL, SLOT_ORDER } from "@/app/(authenticated)/plan/page";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";

@@ -10,17 +10,21 @@ git pull --rebase
 
 Goal: Polish the app structure before adding new features.
 
-### Loop 6.5.1 Homepage
+### Loop 6.5.1 Homepage (completed)
 
 Create a proper landing page describing the app:
+
 - `/` → Marketing homepage with sections describing the app
 - `/recipes` → Recipe browser (move current `/` content here)
 - `/r/[slug]` → Individual recipes (keep as-is)
 - User has copy ready for the homepage
 
+Stop condition: Styled homepage appears at /
+
 ### Loop 6.5.2 Consistent Navigation
 
 Add a unified nav bar/header across the site:
+
 - Recipes link (home)
 - Plan link
 - Settings icon
@@ -30,6 +34,7 @@ Add a unified nav bar/header across the site:
 ### Loop 6.5.3 Full Week Calendar
 
 Change plan view from "rolling 7 days" to "full week":
+
 - Show Mon–Sun (or Sun–Sat based on locale)
 - Highlight today with visual indicator
 - Week navigation (prev/next week buttons)
@@ -40,10 +45,10 @@ Stop condition: Navigation feels complete and professional.
 
 ## Upcoming
 
-| Phase | Name | Goal |
-|-------|------|------|
-| 7 | Calendar Export | Decisions on Skylight |
-| 8 | Shopping List | Plan → Shop → Cook loop |
-| 9 | Feedback Loop | Learn what works |
-| 10 | Leftovers | Batch cooking pays forward |
-| Later | Smart Features | LLM-powered suggestions |
+| Phase | Name            | Goal                       |
+| ----- | --------------- | -------------------------- |
+| 7     | Calendar Export | Decisions on Skylight      |
+| 8     | Shopping List   | Plan → Shop → Cook loop    |
+| 9     | Feedback Loop   | Learn what works           |
+| 10    | Leftovers       | Batch cooking pays forward |
+| Later | Smart Features  | LLM-powered suggestions    |
