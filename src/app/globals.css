@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import "../styles/tw-animate.css";
+@import '../styles/tw-animate.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -22,6 +22,12 @@
   --error: #b91c1c;
   --error-bg: #fef2f2;
   --error-border: #fecaca;
+
+  /* Brand (Suppertime) */
+  --brand-primary: #d4846a;
+  --brand-bg: #faf9f7;
+  --brand-accent: #f8ebe4;
+  --brand-dark: #3d3531;
 
   /* Slot Colors - Breakfast (Soft Peach/Coral) */
   --slot-breakfast-bg: #fff5f3;
@@ -88,6 +94,12 @@
   --color-error-bg: var(--error-bg);
   --color-error-border: var(--error-border);
 
+  /* Brand Colors */
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-dark: var(--brand-dark);
+
   /* Slot Colors */
   --color-slot-breakfast-bg: var(--slot-breakfast-bg);
   --color-slot-breakfast-card: var(--slot-breakfast-card);
@@ -103,6 +115,7 @@
   --color-slot-dinner-border: var(--slot-dinner-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-brand: var(--font-quicksand);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
