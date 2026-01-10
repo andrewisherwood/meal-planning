@@ -14,7 +14,7 @@ type Recipe = {
 };
 
 // Mealtime filters
-const MEALTIME_FILTERS = ["all", "breakfast", "lunch", "dinner", "snack"] as const;
+const MEALTIME_FILTERS = ["all", "breakfast", "lunch", "dinner", "snack", "soup", "pudding", "side"] as const;
 
 // Dietary/attribute filters
 const ATTRIBUTE_FILTERS = ["vegetarian", "vegan", "kid_friendly", "quick", "batch_cook", "freezer_friendly"] as const;
@@ -32,6 +32,9 @@ const FILTER_LABELS: Record<string, string> = {
   quick: "Quick",
   batch_cook: "Batch Cook",
   freezer_friendly: "Freezer",
+  soup: "Soup",
+  pudding: "Pudding",
+  side: "Side",
 };
 
 type FilterOption = typeof MEALTIME_FILTERS[number] | typeof ATTRIBUTE_FILTERS[number];
