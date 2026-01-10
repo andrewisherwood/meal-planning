@@ -515,6 +515,42 @@ export default function PlanPage() {
         meal={selectedMeal}
         onClose={() => setSelectedMeal(null)}
         onDelete={handleDeleteMeal}
+        onUpdate={() => {
+          // Refresh the meal data after edit
+          if (selectedMeal) {
+            const fetchUpdated = async () => {
+              const supabase = createClient();
+              const { data } = await supabase
+                .from("meal_plan")
+                .select(`
+                  id,
+                  date,
+                  meal,
+                  pos,
+                  notes,
+                  recipe_id,
+                  recipes:recipes (
+                    id,
+                    title,
+                    slug,
+                    tags
+                  )
+                `)
+                .eq("id", selectedMeal.id)
+                .single();
+
+              if (data) {
+                const normalized = {
+                  ...data,
+                  recipes: Array.isArray(data.recipes) ? data.recipes[0] ?? null : data.recipes,
+                };
+                setRows((prev) => prev.map((r) => (r.id === selectedMeal.id ? normalized : r)));
+                setSelectedMeal(normalized);
+              }
+            };
+            fetchUpdated();
+          }
+        }}
       />
     </div>
   );

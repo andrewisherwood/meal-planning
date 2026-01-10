@@ -172,8 +172,8 @@ export default function ImportPage() {
 
   return (
     <main style={{ padding: 32, maxWidth: 900, margin: "0 auto" }}>
-      <Link href="/" style={{ opacity: 0.8 }}>
-        ← Back
+      <Link href="/recipes" style={{ opacity: 0.8 }}>
+        ← Back to recipes
       </Link>
 
       <h1 style={{ fontSize: 28, marginTop: 12 }}>Import recipe JSON</h1>

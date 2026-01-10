@@ -62,9 +62,28 @@ function getDayName(ymd: string) {
   return date.toLocaleDateString("en-GB", { weekday: "long" });
 }
 
-// Map meal slots to filter tags
-const FILTER_OPTIONS = ["all", "breakfast", "lunch", "dinner", "snack"] as const;
-type FilterOption = (typeof FILTER_OPTIONS)[number];
+// Mealtime filters
+const MEALTIME_FILTERS = ["all", "breakfast", "lunch", "dinner", "snack"] as const;
+
+// Dietary/attribute filters
+const ATTRIBUTE_FILTERS = ["vegetarian", "vegan", "kid_friendly", "quick", "batch_cook", "freezer_friendly"] as const;
+
+// Human-readable labels
+const FILTER_LABELS: Record<string, string> = {
+  all: "All",
+  breakfast: "Breakfast",
+  lunch: "Lunch",
+  dinner: "Dinner",
+  snack: "Snack",
+  vegetarian: "Vegetarian",
+  vegan: "Vegan",
+  kid_friendly: "Kid Friendly",
+  quick: "Quick",
+  batch_cook: "Batch Cook",
+  freezer_friendly: "Freezer",
+};
+
+type FilterOption = typeof MEALTIME_FILTERS[number] | typeof ATTRIBUTE_FILTERS[number];
 
 function slotToFilter(slot: string): FilterOption {
   if (slot === "breakfast") return "breakfast";
@@ -109,7 +128,7 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
       let request = supabase
         .from("recipes")
         .select("id,title,slug,prep_minutes,cook_minutes,tags")
-        .limit(20);
+        .limit(100);
 
       // Apply text search
       if (query.trim()) {
@@ -193,9 +212,9 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
             className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
           />
 
-          {/* Filter chips */}
+          {/* Mealtime filter chips */}
           <div className="flex flex-wrap gap-2">
-            {FILTER_OPTIONS.map((opt) => (
+            {MEALTIME_FILTERS.map((opt) => (
               <button
                 key={opt}
                 type="button"
@@ -206,7 +225,25 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
                     : "bg-surface-muted text-text-secondary hover:bg-surface hover:text-text-primary border border-border"
                 }`}
               >
-                {opt === "all" ? "All" : opt.charAt(0).toUpperCase() + opt.slice(1)}
+                {FILTER_LABELS[opt]}
+              </button>
+            ))}
+          </div>
+
+          {/* Attribute filter chips */}
+          <div className="flex flex-wrap gap-2">
+            {ATTRIBUTE_FILTERS.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setFilter(opt)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+                  filter === opt
+                    ? "bg-text-primary text-surface"
+                    : "bg-surface-muted text-text-secondary hover:bg-surface hover:text-text-primary border border-border"
+                }`}
+              >
+                {FILTER_LABELS[opt]}
               </button>
             ))}
           </div>

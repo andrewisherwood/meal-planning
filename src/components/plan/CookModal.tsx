@@ -17,6 +17,7 @@ type CookModalProps = {
   meal: PlanRow | null;
   onClose: () => void;
   onDelete: () => void;
+  onUpdate?: () => void; // Called after saving to refresh parent data
 };
 
 function formatDate(ymd: string) {
@@ -28,10 +29,18 @@ function formatDate(ymd: string) {
   });
 }
 
-export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
+export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps) {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editIngredients, setEditIngredients] = useState<string[]>([]);
+  const [editSteps, setEditSteps] = useState<string[]>([]);
+  const [editNotes, setEditNotes] = useState("");
 
   useEffect(() => {
     if (!meal?.recipe_id) {
@@ -63,6 +72,102 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
     fetchDetails();
   }, [meal?.recipe_id]);
 
+  // Reset edit state when modal closes or meal changes
+  useEffect(() => {
+    setIsEditing(false);
+  }, [meal?.id]);
+
+  // Initialize edit state when entering edit mode
+  const enterEditMode = () => {
+    setEditTitle(meal?.recipes?.title ?? "");
+    setEditIngredients(ingredients.map((i) => i.line));
+    setEditSteps(steps.map((s) => s.text));
+    setEditNotes(meal?.notes ?? "");
+    setIsEditing(true);
+  };
+
+  // Cancel editing
+  const cancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  // Save changes
+  const handleSave = async () => {
+    if (!meal?.recipe_id) return;
+
+    setSaving(true);
+    const supabase = createClient();
+
+    try {
+      // Update recipe title
+      if (editTitle !== meal.recipes?.title) {
+        await supabase
+          .from("recipes")
+          .update({ title: editTitle, updated_at: new Date().toISOString() })
+          .eq("id", meal.recipe_id);
+      }
+
+      // Update ingredients (delete all + insert new)
+      await supabase.from("recipe_ingredients").delete().eq("recipe_id", meal.recipe_id);
+      const newIngredients = editIngredients
+        .filter((line) => line.trim())
+        .map((line) => ({
+          recipe_id: meal.recipe_id,
+          line: line.trim(),
+          name: line.trim(),
+          optional: false,
+        }));
+      if (newIngredients.length > 0) {
+        await supabase.from("recipe_ingredients").insert(newIngredients);
+      }
+
+      // Update steps (delete all + insert new)
+      await supabase.from("recipe_steps").delete().eq("recipe_id", meal.recipe_id);
+      const newSteps = editSteps
+        .filter((text) => text.trim())
+        .map((text, idx) => ({
+          recipe_id: meal.recipe_id,
+          step_no: idx + 1,
+          text: text.trim(),
+        }));
+      if (newSteps.length > 0) {
+        await supabase.from("recipe_steps").insert(newSteps);
+      }
+
+      // Update meal notes
+      await supabase
+        .from("meal_plan")
+        .update({ notes: editNotes.trim() || null })
+        .eq("id", meal.id);
+
+      // Refresh local state
+      setIngredients(
+        newIngredients.map((i, idx) => ({ id: `new-${idx}`, line: i.line, optional: false }))
+      );
+      setSteps(newSteps.map((s, idx) => ({ id: `new-${idx}`, step_no: s.step_no, text: s.text })));
+
+      setIsEditing(false);
+      onUpdate?.();
+    } catch (error) {
+      console.error("Failed to save:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Ingredient helpers
+  const addIngredient = () => setEditIngredients([...editIngredients, ""]);
+  const removeIngredient = (idx: number) =>
+    setEditIngredients(editIngredients.filter((_, i) => i !== idx));
+  const updateIngredient = (idx: number, value: string) =>
+    setEditIngredients(editIngredients.map((v, i) => (i === idx ? value : v)));
+
+  // Step helpers
+  const addStep = () => setEditSteps([...editSteps, ""]);
+  const removeStep = (idx: number) => setEditSteps(editSteps.filter((_, i) => i !== idx));
+  const updateStep = (idx: number, value: string) =>
+    setEditSteps(editSteps.map((v, i) => (i === idx ? value : v)));
+
   if (!meal) return null;
 
   return (
@@ -77,9 +182,19 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
         <DialogHeader className="p-6 pb-4 border-b border-border">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-2xl font-semibold text-text-primary leading-tight">
-                {meal.recipes?.title ?? "Recipe"}
-              </DialogTitle>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="text-2xl font-semibold text-text-primary leading-tight w-full bg-transparent border-b-2 border-border focus:border-text-primary focus:outline-none"
+                  placeholder="Recipe title"
+                />
+              ) : (
+                <DialogTitle className="text-2xl font-semibold text-text-primary leading-tight">
+                  {meal.recipes?.title ?? "Recipe"}
+                </DialogTitle>
+              )}
 
               {/* Date */}
               <div className="flex items-center gap-2 mt-2 text-sm text-text-secondary">
@@ -102,8 +217,8 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
                 {formatDate(meal.date)}
               </div>
 
-              {/* Tags */}
-              {meal.recipes?.tags?.length ? (
+              {/* Tags (view mode only) */}
+              {!isEditing && meal.recipes?.tags?.length ? (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {meal.recipes.tags.map((tag) => (
                     <span
@@ -119,60 +234,65 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
 
             {/* Action icons */}
             <div className="flex items-center gap-1">
-              {/* Edit icon (placeholder for future) */}
-              <button
-                type="button"
-                className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
-                title="Edit recipe (coming soon)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                  <path d="m15 5 4 4" />
-                </svg>
-              </button>
+              {!isEditing && (
+                <>
+                  {/* Edit icon */}
+                  <button
+                    type="button"
+                    onClick={enterEditMode}
+                    className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+                    title="Edit recipe"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                      <path d="m15 5 4 4" />
+                    </svg>
+                  </button>
 
-              {/* Delete icon */}
-              <button
-                type="button"
-                onClick={onDelete}
-                className="p-2 rounded-lg text-text-muted hover:text-destructive hover:bg-error-bg transition-colors cursor-pointer"
-                title="Remove from plan"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 6h18" />
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                  <line x1="10" y1="11" x2="10" y2="17" />
-                  <line x1="14" y1="11" x2="14" y2="17" />
-                </svg>
-              </button>
+                  {/* Delete icon */}
+                  <button
+                    type="button"
+                    onClick={onDelete}
+                    className="p-2 rounded-lg text-text-muted hover:text-destructive hover:bg-error-bg transition-colors cursor-pointer"
+                    title="Remove from plan"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M3 6h18" />
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                  </button>
+                </>
+              )}
 
               {/* Close icon */}
               <button
                 type="button"
-                onClick={onClose}
+                onClick={isEditing ? cancelEdit : onClose}
                 className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
-                title="Close"
+                title={isEditing ? "Cancel" : "Close"}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -197,8 +317,126 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
         <div className="p-6 pt-4 space-y-6 overflow-y-auto max-h-[60vh]">
           {loading ? (
             <p className="text-sm text-text-muted py-4 text-center">Loading...</p>
-          ) : (
+          ) : isEditing ? (
+            /* Edit Mode */
             <>
+              {/* Ingredients */}
+              <section>
+                <h3 className="text-base font-semibold text-text-primary mb-3">Ingredients</h3>
+                <div className="space-y-2">
+                  {editIngredients.map((ing, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={ing}
+                        onChange={(e) => updateIngredient(idx, e.target.value)}
+                        placeholder="e.g., 200g flour"
+                        className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-surface text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeIngredient(idx)}
+                        className="p-2 text-text-muted hover:text-destructive transition-colors"
+                        title="Remove"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addIngredient}
+                    className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    + Add ingredient
+                  </button>
+                </div>
+              </section>
+
+              {/* Steps */}
+              <section>
+                <h3 className="text-base font-semibold text-text-primary mb-3">Steps</h3>
+                <div className="space-y-2">
+                  {editSteps.map((step, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-slot-dinner-bg text-slot-dinner-border text-sm font-medium flex items-center justify-center mt-2">
+                        {idx + 1}
+                      </span>
+                      <textarea
+                        value={step}
+                        onChange={(e) => updateStep(idx, e.target.value)}
+                        placeholder="Describe this step..."
+                        rows={2}
+                        className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-surface text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeStep(idx)}
+                        className="p-2 text-text-muted hover:text-destructive transition-colors mt-1"
+                        title="Remove"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addStep}
+                    className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    + Add step
+                  </button>
+                </div>
+              </section>
+
+              {/* Meal Notes */}
+              <section>
+                <h3 className="text-base font-semibold text-text-primary mb-3">Notes for this meal</h3>
+                <textarea
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="e.g., Double portion, skip the onions..."
+                  rows={2}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-surface text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                />
+              </section>
+
+              {/* Save/Cancel buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex-1 px-4 py-2 rounded-lg bg-text-primary text-surface font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  disabled={saving}
+                  className="px-4 py-2 rounded-lg border border-border text-text-secondary font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            /* View Mode */
+            <>
+              {/* Meal notes (if any) */}
+              {meal.notes && (
+                <section className="bg-surface-muted rounded-lg p-3">
+                  <p className="text-sm text-text-secondary italic">{meal.notes}</p>
+                </section>
+              )}
+
               {/* Ingredients */}
               <section>
                 <div className="flex items-center gap-2 mb-3">
@@ -221,21 +459,14 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
                     <line x1="3" y1="12" x2="3.01" y2="12" />
                     <line x1="3" y1="18" x2="3.01" y2="18" />
                   </svg>
-                  <h3 className="text-base font-semibold text-text-primary">
-                    Ingredients
-                  </h3>
+                  <h3 className="text-base font-semibold text-text-primary">Ingredients</h3>
                 </div>
                 {ingredients.length > 0 ? (
                   <ul className="space-y-2 pl-1">
                     {ingredients.map((ing) => (
-                      <li
-                        key={ing.id}
-                        className="text-sm text-text-secondary leading-relaxed"
-                      >
+                      <li key={ing.id} className="text-sm text-text-secondary leading-relaxed">
                         {ing.line}
-                        {ing.optional && (
-                          <span className="text-text-muted ml-1">(optional)</span>
-                        )}
+                        {ing.optional && <span className="text-text-muted ml-1">(optional)</span>}
                       </li>
                     ))}
                   </ul>
@@ -246,9 +477,7 @@ export function CookModal({ meal, onClose, onDelete }: CookModalProps) {
 
               {/* Steps */}
               <section>
-                <h3 className="text-base font-semibold text-text-primary mb-3">
-                  Steps
-                </h3>
+                <h3 className="text-base font-semibold text-text-primary mb-3">Steps</h3>
                 {steps.length > 0 ? (
                   <ol className="space-y-4">
                     {steps.map((step, index) => (
