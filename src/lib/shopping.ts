@@ -290,11 +290,11 @@ export function formatShoppingListForExport(
 }
 
 /**
- * Format shopping list for iOS Reminders via Shortcuts
- * Format: Category headers with items below, separated by ---
+ * Format shopping list for sharing (iOS Share Sheet, Notes, etc.)
+ * Clean format with category headers and bullet points
  */
 export function formatShoppingListForReminders(shoppingList: ShoppingList): string {
-  const sections: string[] = [];
+  const lines: string[] = [];
 
   for (const category of CATEGORY_ORDER) {
     const items = shoppingList[category];
@@ -303,14 +303,16 @@ export function formatShoppingListForReminders(shoppingList: ShoppingList): stri
     const unchecked = items.filter((i) => !i.have);
     if (unchecked.length === 0) continue;
 
-    const sectionLines = [category.toUpperCase()];
-    for (const item of unchecked) {
-      sectionLines.push(item.displayLine);
+    if (lines.length > 0) {
+      lines.push(""); // blank line between categories
     }
-    sections.push(sectionLines.join("\n"));
+    lines.push(category);
+    for (const item of unchecked) {
+      lines.push(`- ${item.displayLine}`);
+    }
   }
 
-  return sections.join("\n---\n");
+  return lines.join("\n");
 }
 
 /**
