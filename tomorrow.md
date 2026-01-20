@@ -1,54 +1,47 @@
-Before you start:
-git pull --rebase
+# tomorrow.md
 
-## Completed
+## Current: Shopping List Feature
 
-- Phase 0–5: Core functionality (grid, recipes, cook modal, drag-drop)
-- Phase 6: Auth & Households (magic link, RLS, protected routes)
+Branch: `feature/shopping-list`
 
-## Next: Phase 6.5 — Navigation & UX Refinements
+### Done
+- [x] Generate shopping list from planned meals
+- [x] Aggregate ingredients by name+unit
+- [x] Group by category (Fresh Produce, Dairy, etc.)
+- [x] Pantry state (check off items, persists)
+- [x] Copy List button
+- [x] Fix duplicate React key error
 
-Goal: Polish the app structure before adding new features.
+### Done
+- [x] Share button — uses Web Share API on iOS (native share sheet), clipboard fallback on desktop
 
-### Loop 6.5.1 Homepage (completed)
+### Then
+- [ ] Test full flow on mobile
+- [ ] Review and merge feature branch
 
-Create a proper landing page describing the app:
+---
 
-- `/` → Marketing homepage with sections describing the app
-- `/recipes` → Recipe browser (move current `/` content here)
-- `/r/[slug]` → Individual recipes (keep as-is)
-- User has copy ready for the homepage
+## Next: Skylight Calendar Export
 
-Stop condition: Styled homepage appears at /
+Goal: Send meal plan to Skylight display via email or calendar feed.
 
-### Loop 6.5.2 Consistent Navigation
+### Options to explore
+- Email the plan to Skylight's calendar address
+- ICS feed subscription
+- One-button "Send to Skylight" in plan view
 
-Add a unified nav bar/header across the site:
+---
 
-- Recipes link (home)
-- Plan link
-- Settings icon
-- Current page indicator
-- Works on mobile and desktop
+## Bugs (backlog)
 
-### Loop 6.5.3 Full Week Calendar
+- [ ] Signout redirects to error instead of homepage
+- [ ] Pages slow to load until cached — investigate
 
-Change plan view from "rolling 7 days" to "full week":
+---
 
-- Show Mon–Sun (or Sun–Sat based on locale)
-- Highlight today with visual indicator
-- Week navigation (prev/next week buttons)
-- "Today" button to jump back to current week
-- Remember: mobile still uses day stack with day tabs
+## Pre-launch Checklist
 
-Stop condition: Navigation feels complete and professional.
-
-## Upcoming
-
-| Phase | Name            | Goal                       |
-| ----- | --------------- | -------------------------- |
-| 7     | Calendar Export | Decisions on Skylight      |
-| 8     | Shopping List   | Plan → Shop → Cook loop    |
-| 9     | Feedback Loop   | Learn what works           |
-| 10    | Leftovers       | Batch cooking pays forward |
-| Later | Smart Features  | LLM-powered suggestions    |
+- [ ] Full signup → onboard → plan → cook flow tested
+- [ ] Partner/friend tests on their phone
+- [ ] Mobile nav works properly
+- [ ] Homepage → login → onboarding → plan is smooth

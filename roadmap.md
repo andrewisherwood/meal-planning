@@ -303,85 +303,97 @@ Stop condition: family members can create accounts and see their shared plan. �
 
 ---
 
-## Phase 6.5 — Navigation & UX Refinements (next)
+## Phase 6.5 — Navigation & UX Refinements (done)
 
 Goal
 
 Polish app structure before adding features.
 
-### Loop 6.5.1 Homepage
-
-Create landing page at `/` with marketing copy
-
-Move recipe browser from `/` to `/recipes`
-
-Keep `/r/[slug]` for individual recipes
-
-### Loop 6.5.2 Consistent navigation
-
-Unified nav across site (Recipes, Plan, Settings)
-
-Works on mobile and desktop
-
-### Loop 6.5.3 Full week calendar
+### Loop 6.5.1 Full week calendar (done)
 
 Show Mon–Sun instead of rolling 7 days
 
-Today indicator
+Today indicator (dot badge + highlight)
 
-Week navigation (prev/next/today)
+Week navigation (prev/next/today buttons)
 
-Stop condition: navigation feels complete and professional.
+### Loop 6.5.2 Recipe filters & search (done)
 
----
+Filter chips on /recipes page (mealtime + dietary tags)
 
-## Phase 7 — Calendar Export
+Search input with debounced query
 
-Goal
+Matching filter UI in AddDrawer
 
-Decisions feel finished when they're on the calendar.
+### Loop 6.5.3 Recipe editing (done)
 
-### Loop 7.1 ICS subscription feed
+Edit recipes inline from CookModal
 
-Generate .ics file per household
+Edit recipes from /r/[slug] page
 
-Events include meal title + link back to app
-
-### Loop 7.2 Skylight integration
-
-Email the plan to Skylight address from settings
-
-One-button "Send to Skylight"
-
-Stop condition: meals appear on Skylight/Google/Apple calendar.
+Stop condition: core UX is polished. ✅
 
 ---
 
-## Phase 8 — Shopping List
+## Phase 7 — Shopping List (in progress)
 
 Goal
 
 Planning leads to action.
 
-### Loop 8.1 Generate list from plan
+Branch: `feature/shopping-list`
+
+### Loop 7.1 Generate list from plan (done)
 
 Query current week's recipes + ingredients
 
-Aggregate quantities (2 onions + 1 onion = 3 onions)
+Aggregate quantities by name+unit (2 onions + 1 onion = 3 onions)
 
-### Loop 8.2 Shopping UI
+Group by category (Fresh Produce, Dairy & Eggs, etc.)
 
-Checklist view, check off items as you shop
+### Loop 7.2 Shopping UI (done)
 
-Group by store section (produce, dairy, etc.)
+Modal with checklist view
 
-### Loop 8.3 Share list
+Check off items (persisted to pantry table)
 
-Copy to clipboard
+"Already have" section for checked items
 
-Partner sees same list (real-time sync)
+### Loop 7.3 Export (done)
+
+Copy to clipboard ✅
+
+Share button (Web Share API on iOS, clipboard fallback) ✅
+
+### Loop 7.4 Polish
+
+Test on mobile
+
+Merge feature branch
 
 Stop condition: you can go shopping with just your phone.
+
+---
+
+## Phase 8 — Calendar Export
+
+Goal
+
+Decisions feel finished when they're on the calendar.
+
+### Loop 8.1 Skylight integration
+
+Email the plan to Skylight address
+
+One-button "Send to Skylight" in plan view
+
+### Loop 8.2 ICS subscription feed
+
+Generate .ics file per household
+
+Events include meal title + link back to app
+
+Stop condition: meals appear on Skylight/Google/Apple calendar.
 
 ---
 
