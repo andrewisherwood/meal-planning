@@ -335,13 +335,11 @@ Stop condition: core UX is polished. ✅
 
 ---
 
-## Phase 7 — Shopping List (in progress)
+## Phase 7 — Shopping List (done)
 
 Goal
 
 Planning leads to action.
-
-Branch: `feature/shopping-list`
 
 ### Loop 7.1 Generate list from plan (done)
 
@@ -361,69 +359,109 @@ Check off items (persisted to pantry table)
 
 ### Loop 7.3 Export (done)
 
-Copy to clipboard ✅
+Copy to clipboard — formatted with category headers
 
-Share button (Web Share API on iOS, clipboard fallback) ✅
+Send to Reminders — via Apple Shortcut (clipboard-based, creates individual items)
 
-### Loop 7.4 Polish
-
-Test on mobile
-
-Merge feature branch
-
-Stop condition: you can go shopping with just your phone.
+Stop condition: you can go shopping with just your phone. ✅
 
 ---
 
-## Phase 8 — Calendar Export
+## Phase 8 — Share to Calendar
 
 Goal
 
 Decisions feel finished when they're on the calendar.
 
-### Loop 8.1 Skylight integration
+### Loop 8.1 Generate .ics file
 
-Email the plan to Skylight address
+Export full week's meal plan as iCal file
 
-One-button "Send to Skylight" in plan view
+Event title: "Dinner: [Meal Name]"
 
-### Loop 8.2 ICS subscription feed
+Event time: User's configured dinner time (default 6pm, 1 hour duration)
 
-Generate .ics file per household
+Event notes: Optional recipe link or description
 
-Events include meal title + link back to app
+### Loop 8.2 Share sheet integration
+
+Trigger iOS share sheet with .ics file
+
+User can add to Calendar, Skylight, email, etc.
+
+Works offline (generates file locally)
+
+### Loop 8.3 Settings: Dinner time
+
+Add dinner time picker to Settings (default 6pm)
+
+Used for calendar event times and notification scheduling
 
 Stop condition: meals appear on Skylight/Google/Apple calendar.
 
 ---
 
-## Phase 9 — Feedback Loop
+## Phase 9 — "Everyone Ate" Feedback Loop
 
 Goal
 
-Learn what works for your family.
+Close the loop on meal planning with a satisfying micro-interaction.
 
-### Loop 9.1 "Everyone ate it" toggle
+### Loop 9.1 Push notification
 
-Add to cook modal (after cooking)
+Trigger at configurable time (default: 30 mins after dinner time)
 
-Store feedback per meal_plan row
+Copy: "How was [Meal Name] tonight?"
 
-### Loop 9.2 Ratings
+Tap opens feedback modal (not full app)
 
-Optional thumbs up/down or 1-5 stars
+No notification if no meal planned
 
-### Loop 9.3 Surface favorites
+### Loop 9.2 Feedback modal (v1)
 
-Track which recipes are hits vs misses
+Display meal name
 
-Show "family favorites" badge in recipe picker
+Large "Everyone Ate!" button
+
+Confetti animation (1.5 sec, no sound by default)
+
+Meal marked as "completed" in data
+
+"Skip" option marks meal as "skipped" (no confetti)
+
+### Loop 9.3 Settings additions
+
+"Everyone Ate" notification toggle (default: on)
+
+Notification time picker (default: 30 mins after dinner)
+
+Sound toggle (default: off — sleeping children)
+
+### Loop 9.4 Ratings (v2 — future)
+
+After confetti: "How did it go?"
+
+Three emoji buttons: 😍 (Hit) / 😐 (Fine) / 😕 (Miss)
+
+Single tap records rating, modal dismisses
+
+### Data model
+
+```
+meal_completions {
+  meal_plan_id: uuid
+  completed: boolean
+  skipped: boolean
+  rating: 'hit' | 'fine' | 'miss' | null
+  completed_at: timestamp
+}
+```
 
 Stop condition: good recipes bubble up naturally.
 
 ---
 
-## Phase 10 — Leftovers
+## Phase 10 — Leftovers (later)
 
 Goal
 

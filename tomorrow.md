@@ -1,34 +1,45 @@
 # tomorrow.md
 
-## Current: Shopping List Feature
+## Current: Share to Calendar
 
-Branch: `feature/shopping-list`
+Goal: Export weekly meal plan to external calendars (iOS, Google, Skylight).
 
-### Done
-- [x] Generate shopping list from planned meals
-- [x] Aggregate ingredients by name+unit
-- [x] Group by category (Fresh Produce, Dairy, etc.)
-- [x] Pantry state (check off items, persists)
-- [x] Copy List button
-- [x] Fix duplicate React key error
+### To Do
+- [ ] Generate .ics file from week's meal plan
+- [ ] Event format: "Dinner: [Meal Name]" at configured time (default 6pm)
+- [ ] Trigger iOS share sheet for .ics file
+- [ ] Add "Share to Calendar" button to week view
 
-### Done
-- [x] Share button — uses Web Share API on iOS (native share sheet), clipboard fallback on desktop
-
-### Then
-- [ ] Test full flow on mobile
-- [ ] Review and merge feature branch
+### Technical Notes
+- Skylight syncs with Google/Apple calendars, so .ics import works
+- Consider individual meal "Add to calendar" option later
 
 ---
 
-## Next: Skylight Calendar Export
+## Next: "Everyone Ate" Notification & Feedback
 
-Goal: Send meal plan to Skylight display via email or calendar feed.
+Goal: Close the loop with a satisfying micro-interaction that brings users back daily.
 
-### Options to explore
-- Email the plan to Skylight's calendar address
-- ICS feed subscription
-- One-button "Send to Skylight" in plan view
+### v1 (ship first)
+- [ ] Push notification at configurable time (default: 7pm)
+- [ ] Notification tap opens feedback modal
+- [ ] "Everyone Ate!" button with confetti animation
+- [ ] "Skip" option for meals not cooked
+- [ ] Data model: meal completion status
+
+### v2 (after v1 tested)
+- [ ] Post-confetti rating: Hit / Fine / Miss (emoji buttons)
+- [ ] Store rating for future "family favourites" feature
+
+---
+
+## Settings Additions
+
+For new features:
+- [ ] Dinner time picker (default 6pm) — for calendar events & notifications
+- [ ] "Everyone Ate" notification toggle (default: on)
+- [ ] Notification time picker (default: 30 mins after dinner)
+- [ ] Sound toggle (default: off — sleeping children)
 
 ---
 
@@ -45,3 +56,15 @@ Goal: Send meal plan to Skylight display via email or calendar feed.
 - [ ] Partner/friend tests on their phone
 - [ ] Mobile nav works properly
 - [ ] Homepage → login → onboarding → plan is smooth
+
+---
+
+## Recently Completed
+
+### Shopping List (merged to main)
+- [x] Generate list from planned meals
+- [x] Aggregate ingredients by name+unit
+- [x] Group by category (10 aisles)
+- [x] Pantry state (check off items, persists)
+- [x] Copy List button (formatted with headers)
+- [x] Send to Reminders via Apple Shortcut
