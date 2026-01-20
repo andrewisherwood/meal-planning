@@ -290,29 +290,23 @@ export function formatShoppingListForExport(
 }
 
 /**
- * Format shopping list for sharing (iOS Share Sheet, Notes, etc.)
- * Clean format with category headers and bullet points
+ * Format shopping list for iOS Reminders
+ * One item per line - Reminders will auto-categorize and offer to split into separate items
  */
 export function formatShoppingListForReminders(shoppingList: ShoppingList): string {
-  const lines: string[] = [];
+  const items: string[] = [];
 
   for (const category of CATEGORY_ORDER) {
-    const items = shoppingList[category];
-    if (!items || items.length === 0) continue;
+    const categoryItems = shoppingList[category];
+    if (!categoryItems || categoryItems.length === 0) continue;
 
-    const unchecked = items.filter((i) => !i.have);
-    if (unchecked.length === 0) continue;
-
-    if (lines.length > 0) {
-      lines.push(""); // blank line between categories
-    }
-    lines.push(category);
+    const unchecked = categoryItems.filter((i) => !i.have);
     for (const item of unchecked) {
-      lines.push(`- ${item.displayLine}`);
+      items.push(item.displayLine);
     }
   }
 
-  return lines.join("\n");
+  return items.join("\n");
 }
 
 /**
