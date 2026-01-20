@@ -9,6 +9,7 @@ import { DayStack } from "@/components/plan/DayStack";
 import { AddDrawer } from "@/components/plan/AddDrawer";
 import { CookModal } from "@/components/plan/CookModal";
 import { ShoppingModal } from "@/components/plan/ShoppingModal";
+import { generateICS, shareCalendar, formatDateRangeForFilename } from "@/lib/calendar";
 
 export type JoinedRecipe = {
   id: string;
@@ -394,6 +395,29 @@ export default function PlanPage() {
     }
   };
 
+  const handleShareCalendar = async () => {
+    // Convert rows to meal events for calendar
+    const meals = rows
+      .filter((r) => r.recipes) // Only include rows with recipes
+      .map((r) => ({
+        id: r.id,
+        date: r.date,
+        slot: r.meal,
+        recipeName: r.recipes!.title,
+      }));
+
+    if (meals.length === 0) {
+      return; // Nothing to export
+    }
+
+    // Generate .ics content
+    const icsContent = generateICS(meals, { dinnerTime: "18:00" });
+    const filename = formatDateRangeForFilename(weekDates[0], weekDates[6]);
+
+    // Share or download
+    await shareCalendar(icsContent, filename);
+  };
+
   if (loading) {
     return <div className="p-6 text-text-secondary">Loading plan…</div>;
   }
@@ -443,6 +467,20 @@ export default function PlanPage() {
           </span>
           <button
             type="button"
+            onClick={handleShareCalendar}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+            title="Share to calendar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Calendar
+          </button>
+          <button
+            type="button"
             onClick={() => setShoppingOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-accent text-brand-primary hover:bg-brand-accent/80 transition-colors cursor-pointer"
           >
@@ -490,6 +528,19 @@ export default function PlanPage() {
           <span className="text-sm text-text-secondary">
             {formatWeekRange(weekDates[0], weekDates[6])}
           </span>
+          <button
+            type="button"
+            onClick={handleShareCalendar}
+            className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+            title="Share to calendar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </button>
           <button
             type="button"
             onClick={() => setShoppingOpen(true)}
