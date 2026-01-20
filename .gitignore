@@ -42,3 +42,4 @@ next-env.d.ts
 
 # archive (stale design docs)
 /.archive
+/recipe_seed
