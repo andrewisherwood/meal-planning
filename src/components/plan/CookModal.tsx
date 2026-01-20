@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { createClient } from "@/lib/supabase/client";
 import type { PlanRow } from "@/app/(authenticated)/plan/page";
+import { FeedbackModal } from "./FeedbackModal";
 
 type Ingredient = { id: string; line: string; optional: boolean };
 type Step = { id: string; step_no: number; text: string };
@@ -37,6 +38,7 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
 
   // Edit mode state
   const [isEditing, setIsEditing] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editIngredients, setEditIngredients] = useState<string[]>([]);
   const [editSteps, setEditSteps] = useState<string[]>([]);
@@ -75,6 +77,7 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
   // Reset edit state when modal closes or meal changes
   useEffect(() => {
     setIsEditing(false);
+    setShowFeedback(false);
   }, [meal?.id]);
 
   // Initialize edit state when entering edit mode
@@ -495,10 +498,48 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
                   <p className="text-sm text-text-muted">No steps listed</p>
                 )}
               </section>
+
+              {/* Done cooking button */}
+              <section className="pt-4 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setShowFeedback(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-500 text-white font-medium hover:bg-green-600 transition-colors cursor-pointer"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Done cooking?
+                </button>
+              </section>
             </>
           )}
         </div>
       </DialogContent>
+
+      {/* Feedback modal */}
+      {meal && (
+        <FeedbackModal
+          open={showFeedback}
+          onClose={() => {
+            setShowFeedback(false);
+            onClose(); // Close the cook modal too
+          }}
+          mealPlanId={meal.id}
+          mealName={meal.recipes?.title ?? "This meal"}
+          date={meal.date}
+        />
+      )}
     </Dialog>
   );
 }

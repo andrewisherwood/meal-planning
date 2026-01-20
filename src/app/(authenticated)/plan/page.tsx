@@ -109,6 +109,7 @@ export default function PlanPage() {
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [householdName, setHouseholdName] = useState<string>("");
   const [householdId, setHouseholdId] = useState<string>("");
+  const [dinnerTime, setDinnerTime] = useState<string>("18:00");
   const [selectedCell, setSelectedCell] = useState<SelectedCell>(null);
   const [selectedMeal, setSelectedMeal] = useState<PlanRow | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -270,7 +271,7 @@ export default function PlanPage() {
       // Get user's household (RLS ensures we only see our own)
       const { data: hh, error: hhErr } = await supabase
         .from("households")
-        .select("id,name")
+        .select("id,name,dinner_time")
         .single();
 
       if (hhErr) {
@@ -281,6 +282,10 @@ export default function PlanPage() {
 
       setHouseholdName(hh.name);
       setHouseholdId(hh.id);
+      if (hh.dinner_time) {
+        // dinner_time comes as "HH:MM:SS", convert to "HH:MM"
+        setDinnerTime(hh.dinner_time.slice(0, 5));
+      }
 
       // Use weekDates for the date range query
       const startYmd = weekDates[0];
@@ -410,8 +415,8 @@ export default function PlanPage() {
       return; // Nothing to export
     }
 
-    // Generate .ics content
-    const icsContent = generateICS(meals, { dinnerTime: "18:00" });
+    // Generate .ics content using household's dinner time setting
+    const icsContent = generateICS(meals, { dinnerTime });
     const filename = formatDateRangeForFilename(weekDates[0], weekDates[6]);
 
     // Share or download
