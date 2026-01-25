@@ -34,6 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${quicksand.variable} antialiased`}
       >
         {children}
+        <script async src="https://scripts.withcabin.com/hello.js"></script>
       </body>
     </html>
   );
