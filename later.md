@@ -41,7 +41,7 @@ Ideas and notes that don't belong in the current loop.
 
 ## Adds
 
-- making the recipe editable in the cook modal. There is already an icon
+- ~making the recipe editable in the cook modal. There is already an icon~
 
 ## bugs
 
@@ -50,3 +50,4 @@ Ideas and notes that don't belong in the current loop.
 - dinner - sides preselects dinner not sides in AddDrawer
 - dinner - pudding preselcts dinner not pudding in AddDrawer
 - send to reminders there should be a visual prompt or a bit mor explanation that you need to press the button teice and have shopping set. up in reminders app
+  -make sure active nav highlighting works for shopping and calendar

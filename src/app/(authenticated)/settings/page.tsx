@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from './sign-out-button'
 import { InviteCode } from './invite-code'
 import { MealSettings } from './meal-settings'
+import { NotificationSettings } from './notification-settings'
 
 type HouseholdData = {
   id: string;
@@ -105,6 +106,16 @@ export default async function SettingsPage() {
             initialNotificationsEnabled={household.notifications_enabled ?? true}
             initialNotificationTime={household.notification_time ?? "19:00"}
             initialNotificationSound={household.notification_sound ?? false}
+          />
+        </div>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-lg font-medium text-[var(--text-primary)] mb-3">Device Notifications</h2>
+        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+          <NotificationSettings
+            userId={user.id}
+            householdId={household.id}
           />
         </div>
       </section>
