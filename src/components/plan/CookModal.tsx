@@ -43,6 +43,7 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
   const [editIngredients, setEditIngredients] = useState<string[]>([]);
   const [editSteps, setEditSteps] = useState<string[]>([]);
   const [editNotes, setEditNotes] = useState("");
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!meal?.recipe_id) {
@@ -86,6 +87,7 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
     setEditIngredients(ingredients.map((i) => i.line));
     setEditSteps(steps.map((s) => s.text));
     setEditNotes(meal?.notes ?? "");
+    setSaveError(null);
     setIsEditing(true);
   };
 
@@ -99,19 +101,26 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
     if (!meal?.recipe_id) return;
 
     setSaving(true);
+    setSaveError(null);
     const supabase = createClient();
 
     try {
       // Update recipe title
       if (editTitle !== meal.recipes?.title) {
-        await supabase
+        const { error } = await supabase
           .from("recipes")
           .update({ title: editTitle, updated_at: new Date().toISOString() })
           .eq("id", meal.recipe_id);
+        if (error) throw new Error(`Failed to save title: ${error.message}`);
       }
 
       // Update ingredients (delete all + insert new)
-      await supabase.from("recipe_ingredients").delete().eq("recipe_id", meal.recipe_id);
+      const { error: delIngErr } = await supabase
+        .from("recipe_ingredients")
+        .delete()
+        .eq("recipe_id", meal.recipe_id);
+      if (delIngErr) throw new Error(`Failed to update ingredients: ${delIngErr.message}`);
+
       const newIngredients = editIngredients
         .filter((line) => line.trim())
         .map((line) => ({
@@ -121,11 +130,17 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
           optional: false,
         }));
       if (newIngredients.length > 0) {
-        await supabase.from("recipe_ingredients").insert(newIngredients);
+        const { error: insIngErr } = await supabase.from("recipe_ingredients").insert(newIngredients);
+        if (insIngErr) throw new Error(`Failed to save ingredients: ${insIngErr.message}`);
       }
 
       // Update steps (delete all + insert new)
-      await supabase.from("recipe_steps").delete().eq("recipe_id", meal.recipe_id);
+      const { error: delStepErr } = await supabase
+        .from("recipe_steps")
+        .delete()
+        .eq("recipe_id", meal.recipe_id);
+      if (delStepErr) throw new Error(`Failed to update steps: ${delStepErr.message}`);
+
       const newSteps = editSteps
         .filter((text) => text.trim())
         .map((text, idx) => ({
@@ -134,14 +149,16 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
           text: text.trim(),
         }));
       if (newSteps.length > 0) {
-        await supabase.from("recipe_steps").insert(newSteps);
+        const { error: insStepErr } = await supabase.from("recipe_steps").insert(newSteps);
+        if (insStepErr) throw new Error(`Failed to save steps: ${insStepErr.message}`);
       }
 
       // Update meal notes
-      await supabase
+      const { error: notesErr } = await supabase
         .from("meal_plan")
         .update({ notes: editNotes.trim() || null })
         .eq("id", meal.id);
+      if (notesErr) throw new Error(`Failed to save notes: ${notesErr.message}`);
 
       // Refresh local state
       setIngredients(
@@ -153,6 +170,7 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
       onUpdate?.();
     } catch (error) {
       console.error("Failed to save:", error);
+      setSaveError(error instanceof Error ? error.message : "Failed to save changes");
     } finally {
       setSaving(false);
     }
@@ -409,6 +427,13 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
                   className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-surface text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                 />
               </section>
+
+              {/* Error message */}
+              {saveError && (
+                <div className="px-3 py-2 rounded-lg bg-error-bg border border-error-border text-sm text-error">
+                  {saveError}
+                </div>
+              )}
 
               {/* Save/Cancel buttons */}
               <div className="flex gap-3 pt-2">

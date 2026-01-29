@@ -174,6 +174,9 @@ function PlanPageContent() {
         ? Math.max(...targetSlotItems.map((r) => r.pos)) + 1
         : 0;
 
+      // Store original rows for rollback
+      const originalRows = rows;
+
       // Optimistic update
       const updatedItem = { ...activeItem, date: targetDate, meal: targetSlot, pos: newPos };
       const updatedRows = rows.map((r) => (r.id === activeId ? updatedItem : r));
@@ -200,6 +203,9 @@ function PlanPageContent() {
 
       if (error) {
         console.error("Failed to move meal:", error);
+        // Rollback on error
+        setRows(originalRows);
+        return;
       }
 
       // Update source slot pos values
@@ -236,6 +242,9 @@ function PlanPageContent() {
 
     if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
 
+    // Store original rows for rollback
+    const originalRows = rows;
+
     // Reorder the slot items
     const reorderedSlotItems = arrayMove(slotItems, oldIndex, newIndex);
 
@@ -253,6 +262,7 @@ function PlanPageContent() {
 
     // Persist to DB - batch update pos values
     const supabase = createClient();
+    let hasError = false;
     for (const item of updatedSlotItems) {
       const { error } = await supabase
         .from("meal_plan")
@@ -261,7 +271,13 @@ function PlanPageContent() {
 
       if (error) {
         console.error("Failed to update pos:", error);
+        hasError = true;
       }
+    }
+
+    // Rollback if any updates failed
+    if (hasError) {
+      setRows(originalRows);
     }
   };
 
