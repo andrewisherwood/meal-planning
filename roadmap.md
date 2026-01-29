@@ -367,13 +367,13 @@ Stop condition: you can go shopping with just your phone. ✅
 
 ---
 
-## Phase 8 — Share to Calendar
+## Phase 8 — Share to Calendar (done)
 
 Goal
 
 Decisions feel finished when they're on the calendar.
 
-### Loop 8.1 Generate .ics file
+### Loop 8.1 Generate .ics file (done)
 
 Export full week's meal plan as iCal file
 
@@ -383,7 +383,7 @@ Event time: User's configured dinner time (default 6pm, 1 hour duration)
 
 Event notes: Optional recipe link or description
 
-### Loop 8.2 Share sheet integration
+### Loop 8.2 Share sheet integration (done)
 
 Trigger iOS share sheet with .ics file
 
@@ -391,23 +391,23 @@ User can add to Calendar, Skylight, email, etc.
 
 Works offline (generates file locally)
 
-### Loop 8.3 Settings: Dinner time
+### Loop 8.3 Settings: Dinner time (done)
 
 Add dinner time picker to Settings (default 6pm)
 
 Used for calendar event times and notification scheduling
 
-Stop condition: meals appear on Skylight/Google/Apple calendar.
+Stop condition: meals appear on Skylight/Google/Apple calendar. ✅
 
 ---
 
-## Phase 9 — "Everyone Ate" Feedback Loop
+## Phase 9 — "Everyone Ate" Feedback Loop (done)
 
 Goal
 
 Close the loop on meal planning with a satisfying micro-interaction.
 
-### Loop 9.1 Push notification
+### Loop 9.1 Push notification (done)
 
 Trigger at configurable time (default: 30 mins after dinner time)
 
@@ -417,7 +417,7 @@ Tap opens feedback modal (not full app)
 
 No notification if no meal planned
 
-### Loop 9.2 Feedback modal (v1)
+### Loop 9.2 Feedback modal (v1) (done)
 
 Display meal name
 
@@ -429,7 +429,7 @@ Meal marked as "completed" in data
 
 "Skip" option marks meal as "skipped" (no confetti)
 
-### Loop 9.3 Settings additions
+### Loop 9.3 Settings additions (done)
 
 "Everyone Ate" notification toggle (default: on)
 
@@ -445,7 +445,7 @@ Three emoji buttons: 😍 (Hit) / 😐 (Fine) / 😕 (Miss)
 
 Single tap records rating, modal dismisses
 
-### Data model
+### Data model (done)
 
 ```
 meal_completions {
@@ -457,7 +457,7 @@ meal_completions {
 }
 ```
 
-Stop condition: good recipes bubble up naturally.
+Stop condition: good recipes bubble up naturally. ✅
 
 ---
 

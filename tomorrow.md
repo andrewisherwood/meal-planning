@@ -1,45 +1,34 @@
 # tomorrow.md
 
-## Current: Share to Calendar
+## Current: Pre-launch Polish
 
-Goal: Export weekly meal plan to external calendars (iOS, Google, Skylight).
+Goal: Test and polish before sharing with family/friends.
 
 ### To Do
-- [ ] Generate .ics file from week's meal plan
-- [ ] Event format: "Dinner: [Meal Name]" at configured time (default 6pm)
-- [ ] Trigger iOS share sheet for .ics file
-- [ ] Add "Share to Calendar" button to week view
-
-### Technical Notes
-- Skylight syncs with Google/Apple calendars, so .ics import works
-- Consider individual meal "Add to calendar" option later
+- [ ] Full signup → onboard → plan → cook flow tested
+- [ ] Partner/friend tests on their phone
+- [ ] Test push notifications end-to-end
+- [ ] Mobile nav works properly
+- [ ] Homepage → login → onboarding → plan is smooth
 
 ---
 
-## Next: "Everyone Ate" Notification & Feedback
+## Next: Leftovers Tracking (Phase 10)
 
-Goal: Close the loop with a satisfying micro-interaction that brings users back daily.
+Goal: Make batch cooking feel strategic, not wasteful.
 
-### v1 (ship first)
-- [ ] Push notification at configurable time (default: 7pm)
-- [ ] Notification tap opens feedback modal
-- [ ] "Everyone Ate!" button with confetti animation
-- [ ] "Skip" option for meals not cooked
-- [ ] Data model: meal completion status
-
-### v2 (after v1 tested)
-- [ ] Post-confetti rating: Hit / Fine / Miss (emoji buttons)
-- [ ] Store rating for future "family favourites" feature
+### Ideas
+- Mark recipes as "makes leftovers" (yields 2x)
+- Suggest leftover lunches for next day
+- Simple fridge tracking list
 
 ---
 
-## Settings Additions
+## Future: Smart Features
 
-For new features:
-- [ ] Dinner time picker (default 6pm) — for calendar events & notifications
-- [ ] "Everyone Ate" notification toggle (default: on)
-- [ ] Notification time picker (default: 30 mins after dinner)
-- [ ] Sound toggle (default: off — sleeping children)
+- LLM-powered "Plan my week" suggestions
+- Pantry scanning with vision
+- Recipe import from URL
 
 ---
 
@@ -50,18 +39,24 @@ For new features:
 
 ---
 
-## Pre-launch Checklist
-
-- [ ] Full signup → onboard → plan → cook flow tested
-- [ ] Partner/friend tests on their phone
-- [ ] Mobile nav works properly
-- [ ] Homepage → login → onboarding → plan is smooth
-
----
-
 ## Recently Completed
 
-### Shopping List (merged to main)
+### "Everyone Ate" Feedback Loop (Phase 9)
+- [x] Push notification at configurable time (default: 7pm)
+- [x] Notification tap opens feedback modal
+- [x] "Everyone Ate!" button with confetti animation
+- [x] Data model: `meal_completions` table
+- [x] Service worker for push events
+- [x] Device notification settings in Settings page
+- [x] Edge function `send-dinner-notifications`
+
+### Calendar Export (Phase 7)
+- [x] Generate .ics file from week's meal plan
+- [x] Event format: "Dinner: [Meal Name]" at configured time
+- [x] Trigger iOS share sheet for .ics file
+- [x] Dinner time picker in Settings
+
+### Shopping List (Phase 8)
 - [x] Generate list from planned meals
 - [x] Aggregate ingredients by name+unit
 - [x] Group by category (10 aisles)

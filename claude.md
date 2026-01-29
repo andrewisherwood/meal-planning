@@ -171,19 +171,35 @@ Claude should **always**:
 - User settings page
 - Vitest test infrastructure
 
-### Phase 6.5 — Navigation & UX Refinements (next)
+### Phase 6.5 ✅ Complete
 
 - Homepage at `/` with marketing copy (move recipes to `/recipes`)
 - Consistent nav across site (Recipes, Plan, Settings)
 - Full week calendar with today indicator and week navigation
 
-### Phase 7+ — Future
+### Phase 7 ✅ Complete
 
-- Calendar Export (ICS feed, Skylight integration)
-- Shopping List (aggregate ingredients)
-- Feedback Loop (everyone ate it, favorites)
+- Calendar Export (ICS file generation, share to calendar apps)
+
+### Phase 8 ✅ Complete
+
+- Shopping List (aggregate ingredients from week's meals)
+- Reminders integration (iOS Reminders via share sheet)
+- Pantry tracking (mark items you already have)
+
+### Phase 9 ✅ Complete
+
+- "Everyone Ate" feedback loop with confetti celebration
+- Meal completion tracking (`meal_completions` table)
+- Web Push notifications for dinner reminders
+- Push subscription management in Settings
+- Edge function for scheduled notification delivery
+
+### Future Ideas
+
 - Leftovers tracking
 - Smart features (LLM-powered suggestions)
+- Skylight email integration
 
 ---
 
