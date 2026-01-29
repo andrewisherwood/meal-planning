@@ -92,7 +92,9 @@ function slotToFilter(slot: string): FilterOption {
   if (slot === "breakfast") return "breakfast";
   if (slot === "lunch") return "lunch";
   if (slot === "snack") return "snack";
-  if (slot.startsWith("dinner:")) return "dinner";
+  if (slot === "dinner:main") return "dinner";
+  if (slot === "dinner:side") return "side";
+  if (slot === "dinner:pudding") return "pudding";
   return "all";
 }
 
@@ -102,10 +104,30 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
   const defaultFilter = slotToFilter(slot);
 
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<FilterOption>(defaultFilter);
+  const [filters, setFilters] = useState<Set<FilterOption>>(() =>
+    defaultFilter === "all" ? new Set() : new Set([defaultFilter])
+  );
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
+
+  // Toggle a filter on/off
+  const toggleFilter = (opt: FilterOption) => {
+    if (opt === "all") {
+      // "All" clears all filters
+      setFilters(new Set());
+    } else {
+      setFilters((prev) => {
+        const next = new Set(prev);
+        if (next.has(opt)) {
+          next.delete(opt);
+        } else {
+          next.add(opt);
+        }
+        return next;
+      });
+    }
+  };
 
   // Clear notification after 1.5 seconds
   useEffect(() => {
@@ -119,11 +141,12 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
     onAddRecipe(recipe);
   };
 
-  // Fetch recipes on mount and when query/filter changes (debounced)
+  // Fetch recipes on mount and when query/filters change (debounced)
   useEffect(() => {
     if (!open) return;
 
     const controller = new AbortController();
+    const filtersArray = Array.from(filters);
     const timeoutId = setTimeout(async () => {
       setLoading(true);
 
@@ -140,9 +163,9 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
         request = request.order("created_at", { ascending: false });
       }
 
-      // Apply mealtime filter (uses Postgres array contains)
-      if (filter !== "all") {
-        request = request.contains("tags", [filter]);
+      // Apply each filter (all must match - AND logic)
+      for (const f of filtersArray) {
+        request = request.contains("tags", [f]);
       }
 
       const { data, error } = await request;
@@ -162,13 +185,13 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
       controller.abort();
       clearTimeout(timeoutId);
     };
-  }, [open, query, filter]);
+  }, [open, query, filters]);
 
   // Reset state when drawer closes
   useEffect(() => {
     if (!open) {
       setQuery("");
-      setFilter(defaultFilter);
+      setFilters(defaultFilter === "all" ? new Set() : new Set([defaultFilter]));
       setRecipes([]);
       setNotification(null);
     }
@@ -217,20 +240,23 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
 
           {/* Mealtime filter chips */}
           <div className="flex flex-wrap gap-2">
-            {MEALTIME_FILTERS.map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => setFilter(opt)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
-                  filter === opt
-                    ? "bg-text-primary text-surface"
-                    : "bg-surface-muted text-text-secondary hover:bg-surface hover:text-text-primary border border-border"
-                }`}
-              >
-                {FILTER_LABELS[opt]}
-              </button>
-            ))}
+            {MEALTIME_FILTERS.map((opt) => {
+              const isActive = opt === "all" ? filters.size === 0 : filters.has(opt);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => toggleFilter(opt)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+                    isActive
+                      ? "bg-text-primary text-surface"
+                      : "bg-surface-muted text-text-secondary hover:bg-surface hover:text-text-primary border border-border"
+                  }`}
+                >
+                  {FILTER_LABELS[opt]}
+                </button>
+              );
+            })}
           </div>
 
           {/* Attribute filter chips */}
@@ -239,9 +265,9 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
               <button
                 key={opt}
                 type="button"
-                onClick={() => setFilter(opt)}
+                onClick={() => toggleFilter(opt)}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
-                  filter === opt
+                  filters.has(opt)
                     ? "bg-text-primary text-surface"
                     : "bg-surface-muted text-text-secondary hover:bg-surface hover:text-text-primary border border-border"
                 }`}
@@ -259,7 +285,7 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
               </div>
             ) : recipes.length === 0 ? (
               <div className="text-center text-sm text-text-muted py-8">
-                {query || filter !== "all" ? "No recipes found" : "No recipes yet"}
+                {query || filters.size > 0 ? "No recipes found" : "No recipes yet"}
               </div>
             ) : (
               recipes.map((recipe) => {
