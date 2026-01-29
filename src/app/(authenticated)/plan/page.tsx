@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, PointerSensor, TouchSensor, useSensors, useSensor } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { createClient } from "@/lib/supabase/client";
@@ -9,7 +9,9 @@ import { DayStack } from "@/components/plan/DayStack";
 import { AddDrawer } from "@/components/plan/AddDrawer";
 import { CookModal } from "@/components/plan/CookModal";
 import { ShoppingModal } from "@/components/plan/ShoppingModal";
+import { FeedbackModal } from "@/components/plan/FeedbackModal";
 import { generateICS, shareCalendar, formatDateRangeForFilename } from "@/lib/calendar";
+import { useSearchParams } from "next/navigation";
 
 export type JoinedRecipe = {
   id: string;
@@ -103,17 +105,20 @@ export type Recipe = {
   tags: string[] | null;
 };
 
-export default function PlanPage() {
+function PlanPageContent() {
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [householdName, setHouseholdName] = useState<string>("");
   const [householdId, setHouseholdId] = useState<string>("");
+  const [dinnerTime, setDinnerTime] = useState<string>("18:00");
   const [selectedCell, setSelectedCell] = useState<SelectedCell>(null);
   const [selectedMeal, setSelectedMeal] = useState<PlanRow | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
   const [shoppingOpen, setShoppingOpen] = useState(false);
+  const [feedbackMeal, setFeedbackMeal] = useState<{ id: string; name: string; date: string } | null>(null);
 
   // Today's date for highlighting
   const todayYmd = useMemo(() => ymd(new Date()), []);
@@ -270,7 +275,7 @@ export default function PlanPage() {
       // Get user's household (RLS ensures we only see our own)
       const { data: hh, error: hhErr } = await supabase
         .from("households")
-        .select("id,name")
+        .select("id,name,dinner_time")
         .single();
 
       if (hhErr) {
@@ -281,6 +286,10 @@ export default function PlanPage() {
 
       setHouseholdName(hh.name);
       setHouseholdId(hh.id);
+      if (hh.dinner_time) {
+        // dinner_time comes as "HH:MM:SS", convert to "HH:MM"
+        setDinnerTime(hh.dinner_time.slice(0, 5));
+      }
 
       // Use weekDates for the date range query
       const startYmd = weekDates[0];
@@ -329,6 +338,40 @@ export default function PlanPage() {
 
     run();
   }, [weekDates]);
+
+  // Handle feedback query params (from push notification click)
+  useEffect(() => {
+    const showFeedback = searchParams.get("feedback");
+    const mealPlanId = searchParams.get("mealPlanId");
+    const date = searchParams.get("date") || todayYmd;
+
+    if (showFeedback === "true" && rows.length > 0) {
+      // If we have a specific meal plan ID, use that
+      if (mealPlanId) {
+        const meal = rows.find((r) => r.id === mealPlanId);
+        if (meal && meal.recipes) {
+          setFeedbackMeal({
+            id: meal.id,
+            name: meal.recipes.title,
+            date: meal.date,
+          });
+          return;
+        }
+      }
+
+      // Otherwise, find today's dinner:main
+      const todayDinner = rows.find(
+        (r) => r.date === date && r.meal === "dinner:main" && r.recipes
+      );
+      if (todayDinner && todayDinner.recipes) {
+        setFeedbackMeal({
+          id: todayDinner.id,
+          name: todayDinner.recipes.title,
+          date: todayDinner.date,
+        });
+      }
+    }
+  }, [searchParams, rows, todayYmd]);
 
   const grouped = useMemo(() => groupPlan(rows), [rows]);
 
@@ -410,8 +453,8 @@ export default function PlanPage() {
       return; // Nothing to export
     }
 
-    // Generate .ics content
-    const icsContent = generateICS(meals, { dinnerTime: "18:00" });
+    // Generate .ics content using household's dinner time setting
+    const icsContent = generateICS(meals, { dinnerTime });
     const filename = formatDateRangeForFilename(weekDates[0], weekDates[6]);
 
     // Share or download
@@ -642,6 +685,29 @@ export default function PlanPage() {
         startDate={weekDates[0]}
         endDate={weekDates[6]}
       />
+
+      {/* Feedback modal (triggered by push notification click) */}
+      {feedbackMeal && (
+        <FeedbackModal
+          open={true}
+          onClose={() => {
+            setFeedbackMeal(null);
+            // Clear the URL params without navigation
+            window.history.replaceState({}, "", "/plan");
+          }}
+          mealPlanId={feedbackMeal.id}
+          mealName={feedbackMeal.name}
+          date={feedbackMeal.date}
+        />
+      )}
     </div>
+  );
+}
+
+export default function PlanPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-text-secondary">Loading plan...</div>}>
+      <PlanPageContent />
+    </Suspense>
   );
 }

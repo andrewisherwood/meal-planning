@@ -2,6 +2,18 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from './sign-out-button'
 import { InviteCode } from './invite-code'
+import { MealSettings } from './meal-settings'
+import { NotificationSettings } from './notification-settings'
+
+type HouseholdData = {
+  id: string;
+  name: string;
+  invite_code: string;
+  dinner_time: string | null;
+  notifications_enabled: boolean | null;
+  notification_time: string | null;
+  notification_sound: boolean | null;
+};
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -18,7 +30,11 @@ export default async function SettingsPage() {
       households (
         id,
         name,
-        invite_code
+        invite_code,
+        dinner_time,
+        notifications_enabled,
+        notification_time,
+        notification_sound
       )
     `)
     .eq('user_id', user.id)
@@ -27,7 +43,7 @@ export default async function SettingsPage() {
   if (!membership) redirect('/onboarding')
 
   // Supabase returns single relations as objects, not arrays
-  const household = membership.households as unknown as { id: string; name: string; invite_code: string }
+  const household = membership.households as unknown as HouseholdData
   if (!household) redirect('/onboarding')
 
   // Get all members of the household
@@ -79,6 +95,29 @@ export default async function SettingsPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-lg font-medium text-[var(--text-primary)] mb-3">Meal Settings</h2>
+        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+          <MealSettings
+            householdId={household.id}
+            initialDinnerTime={household.dinner_time ?? "18:00"}
+            initialNotificationsEnabled={household.notifications_enabled ?? true}
+            initialNotificationTime={household.notification_time ?? "19:00"}
+            initialNotificationSound={household.notification_sound ?? false}
+          />
+        </div>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-lg font-medium text-[var(--text-primary)] mb-3">Device Notifications</h2>
+        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+          <NotificationSettings
+            userId={user.id}
+            householdId={household.id}
+          />
+        </div>
       </section>
 
       <SignOutButton />
