@@ -156,9 +156,10 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
         .select("id,title,slug,prep_minutes,cook_minutes,tags")
         .limit(100);
 
-      // Apply text search
-      if (query.trim()) {
-        request = request.ilike("title", `%${query.trim()}%`).order("title");
+      // Apply text search (limit query length for safety)
+      const trimmedQuery = query.trim().slice(0, 100)
+      if (trimmedQuery) {
+        request = request.ilike("title", `%${trimmedQuery}%`).order("title");
       } else {
         request = request.order("created_at", { ascending: false });
       }
@@ -235,6 +236,7 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
             placeholder="Search recipes..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            maxLength={100}
             className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
           />
 

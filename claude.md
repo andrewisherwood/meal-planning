@@ -147,6 +147,17 @@ Claude should **always**:
    - Feature branches: `feature/`, `fix/`, `chore/`
    - Use `scripts/git-workflow.sh` helpers
 
+7. **Multi-priority implementation workflow**
+   - Each priority section → separate feature branch
+   - Branch naming: `feature/priority-N-description`
+   - Workflow per branch:
+     1. `git checkout -b feature/priority-N-description`
+     2. Implement changes, commit incrementally
+     3. `git push -u origin feature/...`
+     4. `gh pr create`
+     5. `gh pr merge --squash --delete-branch`
+     6. `git checkout main && git pull`
+
 ---
 
 ## Current Roadmap (Looped)
