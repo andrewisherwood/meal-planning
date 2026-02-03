@@ -98,7 +98,7 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
       className={`flex items-center justify-center w-11 h-11 rounded-xl transition-colors ${
         isActive
           ? "bg-brand-accent text-brand-primary"
-          : "text-text-secondary hover:text-text-primary hover:bg-surface-muted"
+          : "text-text-secondary hover:text-brand-primary hover:bg-brand-accent/50"
       }`}
     >
       {item.icon}
