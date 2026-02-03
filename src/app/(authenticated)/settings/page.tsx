@@ -12,6 +12,9 @@ type HouseholdData = {
   id: string;
   name: string;
   invite_code: string;
+  breakfast_time: string | null;
+  lunch_time: string | null;
+  snack_time: string | null;
   dinner_time: string | null;
   notifications_enabled: boolean | null;
   notification_time: string | null;
@@ -35,6 +38,9 @@ export default async function SettingsPage() {
         id,
         name,
         invite_code,
+        breakfast_time,
+        lunch_time,
+        snack_time,
         dinner_time,
         notifications_enabled,
         notification_time,
@@ -106,6 +112,9 @@ export default async function SettingsPage() {
         <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
           <MealSettings
             householdId={household.id}
+            initialBreakfastTime={household.breakfast_time ?? "08:00"}
+            initialLunchTime={household.lunch_time ?? "12:30"}
+            initialSnackTime={household.snack_time ?? "15:30"}
             initialDinnerTime={household.dinner_time ?? "18:00"}
             initialNotificationsEnabled={household.notifications_enabled ?? true}
             initialNotificationTime={household.notification_time ?? "19:00"}
