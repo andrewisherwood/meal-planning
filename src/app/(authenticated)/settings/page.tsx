@@ -4,6 +4,8 @@ import { SignOutButton } from './sign-out-button'
 import { InviteCode } from './invite-code'
 import { MealSettings } from './meal-settings'
 import { NotificationSettings } from './notification-settings'
+import { PrivacySection } from './privacy-section'
+import { DeleteAccount } from './delete-account'
 
 type HouseholdData = {
   id: string;
@@ -27,6 +29,7 @@ export default async function SettingsPage() {
     .select(`
       name,
       role,
+      is_owner,
       households (
         id,
         name,
@@ -120,7 +123,25 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      <SignOutButton />
+      <section className="mb-8">
+        <h2 className="text-lg font-medium text-[var(--text-primary)] mb-3">Privacy & Data</h2>
+        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+          <PrivacySection userId={user.id} />
+        </div>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-lg font-medium text-[var(--text-primary)] mb-3">Account</h2>
+        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-4">
+          <SignOutButton />
+          <div className="pt-3 border-t border-[var(--border)]">
+            <DeleteAccount
+              memberCount={members?.length ?? 1}
+              isOwner={membership.is_owner ?? false}
+            />
+          </div>
+        </div>
+      </section>
     </main>
   )
 }

@@ -217,6 +217,12 @@ export default function HomePage() {
           <Logo size="sm" />
           <div className="flex items-center gap-6 text-sm text-text-muted">
             <span>&copy; 2025</span>
+            <Link href="/terms" className="hover:text-text-secondary">
+              Terms
+            </Link>
+            <Link href="/privacy" className="hover:text-text-secondary">
+              Privacy
+            </Link>
             <a href="mailto:hello@suppertime.uk" className="hover:text-text-secondary">
               Contact
             </a>

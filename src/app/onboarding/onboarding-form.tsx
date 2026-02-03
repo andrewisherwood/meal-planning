@@ -2,7 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+
+const TERMS_VERSION = '2026-01'
+const PRIVACY_VERSION = '2026-01'
 
 function generateInviteCode() {
   return Math.random().toString(36).substring(2, 10).toUpperCase()
@@ -25,6 +29,9 @@ export function OnboardingForm({ userId }: { userId: string }) {
   // Join household
   const [inviteCode, setInviteCode] = useState('')
   const [joinName, setJoinName] = useState('')
+
+  // Terms acceptance
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,6 +75,22 @@ export function OnboardingForm({ userId }: { userId: string }) {
       return
     }
 
+    // Update profile with terms acceptance
+    const { error: profileErr } = await supabase
+      .from('profiles')
+      .update({
+        terms_accepted_at: new Date().toISOString(),
+        terms_version: TERMS_VERSION,
+        privacy_policy_version: PRIVACY_VERSION,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+
+    if (profileErr) {
+      console.error('Failed to update profile:', profileErr)
+      // Continue anyway - non-critical
+    }
+
     router.push('/plan')
   }
 
@@ -104,8 +127,47 @@ export function OnboardingForm({ userId }: { userId: string }) {
       return
     }
 
+    // Update profile with terms acceptance
+    const { error: profileErr } = await supabase
+      .from('profiles')
+      .update({
+        terms_accepted_at: new Date().toISOString(),
+        terms_version: TERMS_VERSION,
+        privacy_policy_version: PRIVACY_VERSION,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+
+    if (profileErr) {
+      console.error('Failed to update profile:', profileErr)
+      // Continue anyway - non-critical
+    }
+
     router.push('/plan')
   }
+
+  const TermsCheckbox = () => (
+    <div className="flex items-start gap-3">
+      <input
+        type="checkbox"
+        id="terms"
+        checked={termsAccepted}
+        onChange={(e) => setTermsAccepted(e.target.checked)}
+        required
+        className="mt-1 h-4 w-4 rounded border-[var(--border)] text-[var(--text-primary)] focus:ring-[var(--text-primary)]"
+      />
+      <label htmlFor="terms" className="text-sm text-[var(--text-secondary)]">
+        I agree to the{' '}
+        <Link href="/terms" target="_blank" className="underline hover:text-[var(--text-primary)]">
+          Terms of Service
+        </Link>{' '}
+        and{' '}
+        <Link href="/privacy" target="_blank" className="underline hover:text-[var(--text-primary)]">
+          Privacy Policy
+        </Link>
+      </label>
+    </div>
+  )
 
   if (mode === 'choice') {
     return (
@@ -167,10 +229,11 @@ export function OnboardingForm({ userId }: { userId: string }) {
             className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--text-primary)] focus:ring-offset-2"
           />
         </div>
+        <TermsCheckbox />
         {error && <p className="text-sm text-[var(--error)]">{error}</p>}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !termsAccepted}
           className="w-full px-4 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--surface)] font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
         >
           {loading ? 'Creating...' : 'Create household'}
@@ -217,10 +280,11 @@ export function OnboardingForm({ userId }: { userId: string }) {
           className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--text-primary)] focus:ring-offset-2"
         />
       </div>
+      <TermsCheckbox />
       {error && <p className="text-sm text-[var(--error)]">{error}</p>}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || !termsAccepted}
         className="w-full px-4 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--surface)] font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
       >
         {loading ? 'Joining...' : 'Join household'}
