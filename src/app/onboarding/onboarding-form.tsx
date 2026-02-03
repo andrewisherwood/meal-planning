@@ -9,7 +9,12 @@ const TERMS_VERSION = '2026-01'
 const PRIVACY_VERSION = '2026-01'
 
 function generateInviteCode() {
-  return Math.random().toString(36).substring(2, 10).toUpperCase()
+  const array = new Uint8Array(6)
+  crypto.getRandomValues(array)
+  return Array.from(array, b => b.toString(36).padStart(2, '0'))
+    .join('')
+    .substring(0, 8)
+    .toUpperCase()
 }
 
 function slugify(name: string) {
