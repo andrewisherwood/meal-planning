@@ -1,5 +1,15 @@
 # Changelog
 
+## Feb 2026 Improvements
+
+### Filter/Tag Alignment (Database)
+- Fixed 39 orphaned recipes (had no mealtime tags)
+- Fixed 'freezer-friendly' typo → 'freezer_friendly'
+- Added 'dinner' tag to sides, mains, weeknight recipes
+- Added 'snack' tag to puddings
+- Added 'soup' tag to 8 soup recipes
+- All 13 filters now return at least 1 recipe
+
 ## Completed
 
 - Phase 0–5: Core functionality (grid, recipes, cook modal, drag-drop)
