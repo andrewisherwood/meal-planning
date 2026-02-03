@@ -57,7 +57,8 @@ This is a **planning surface** that happens to know about food.
 ## Data Model (Key Concepts)
 
 - `households` — family units that share a meal plan
-- `household_members` — links users to households
+- `household_members` — links users to households (includes `is_owner` for ownership tracking)
+- `profiles` — user consent/privacy data (terms acceptance, notification consent timestamps)
 - `recipes` — shared library + household-private recipes (`household_id` NULL = shared)
 - `meal_plan` — planned meals per household
   - `date` (YYYY-MM-DD)
@@ -66,7 +67,7 @@ This is a **planning surface** that happens to know about food.
   - `recipe_id`
   - `notes`
 
-**RLS (Row Level Security)** enforces data isolation per household.
+**RLS (Row Level Security)** enforces data isolation per household and per user (profiles).
 
 Slots are **fixed and ordered**:
 
@@ -194,6 +195,17 @@ Claude should **always**:
 - Web Push notifications for dinner reminders
 - Push subscription management in Settings
 - Edge function for scheduled notification delivery
+
+### Phase 10 ✅ Complete
+
+- GDPR/Privacy compliance (pre-launch)
+- Privacy Policy and Terms of Service pages (`/privacy`, `/terms`)
+- Terms acceptance during onboarding with checkbox
+- Terms acceptance modal for existing users
+- Two-step push notification consent flow
+- Account deletion with ownership transfer
+- Privacy & Data section in Settings
+- `profiles` table for consent tracking
 
 ### Future Ideas
 
