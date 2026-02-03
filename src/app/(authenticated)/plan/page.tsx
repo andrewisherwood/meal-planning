@@ -541,7 +541,7 @@ function PlanPageContent() {
           <button
             type="button"
             onClick={() => setShoppingOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-accent text-brand-primary hover:bg-brand-accent/80 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="8" cy="21" r="1"/>
@@ -603,7 +603,7 @@ function PlanPageContent() {
           <button
             type="button"
             onClick={() => setShoppingOpen(true)}
-            className="p-2 rounded-lg bg-brand-accent text-brand-primary hover:bg-brand-accent/80 transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
             title="Shopping list"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
