@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { GroupedPlan, PlanRow, SelectedCell } from "@/app/(authenticated)/plan/page";
 import { SLOT_LABEL, SLOT_ORDER } from "@/app/(authenticated)/plan/page";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -134,11 +134,51 @@ export function DayStack({ dates, grouped, today, onCellClick, onMealClick }: Da
     setSelectedIndex(newTodayIndex >= 0 ? newTodayIndex : 0);
   }, [dates, today]);
 
+  // Swipe navigation
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchEndX - touchStartX.current;
+    const deltaY = touchEndY - touchStartY.current;
+
+    // Only trigger swipe if horizontal movement > vertical (not scrolling)
+    // and the swipe is at least 50px
+    const SWIPE_THRESHOLD = 50;
+    if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX < 0 && selectedIndex < dates.length - 1) {
+        // Swipe left -> next day
+        setSelectedIndex((i) => i + 1);
+      } else if (deltaX > 0 && selectedIndex > 0) {
+        // Swipe right -> previous day
+        setSelectedIndex((i) => i - 1);
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   const day = dates[selectedIndex] ?? dates[0];
   const slots = grouped[day] ?? {};
 
   return (
-    <div className="space-y-4">
+    <div
+      ref={containerRef}
+      className="space-y-4"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Day tabs - horizontal scroll */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
         {dates.map((d, i) => {
