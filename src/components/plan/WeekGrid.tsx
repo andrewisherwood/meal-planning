@@ -200,7 +200,7 @@ function Row({
                   <button
                     type="button"
                     onClick={() => onCellClick({ date, slot })}
-                    className={`flex items-center justify-center w-11 h-11 rounded-xl border border-dashed ${colors.border} bg-white/50 text-text-muted hover:bg-white/80 hover:text-text-secondary transition-colors cursor-pointer`}
+                    className={`flex items-center justify-center w-11 h-11 rounded-xl border border-dashed ${colors.border} bg-white/50 text-text-muted hover:bg-white/80 hover:text-text-secondary transition-colors cursor-pointer self-center`}
                     title="Add meal"
                   >
                     <svg
