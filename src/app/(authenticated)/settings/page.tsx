@@ -6,6 +6,7 @@ import { MealSettings } from './meal-settings'
 import { NotificationSettings } from './notification-settings'
 import { PrivacySection } from './privacy-section'
 import { DeleteAccount } from './delete-account'
+import { StaplesSettings } from './staples-settings'
 
 type HouseholdData = {
   id: string;
@@ -110,6 +111,13 @@ export default async function SettingsPage() {
             initialNotificationTime={household.notification_time ?? "19:00"}
             initialNotificationSound={household.notification_sound ?? false}
           />
+        </div>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-lg font-medium text-[var(--text-primary)] mb-3">Shopping Staples</h2>
+        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+          <StaplesSettings householdId={household.id} />
         </div>
       </section>
 

@@ -23,6 +23,7 @@ export type ShoppingItem = {
   have: boolean; // from pantry table
   qty: number | null;
   unit: string | null;
+  isStaple?: boolean; // true if this is a staple item
 };
 
 export type ShoppingList = Record<string, ShoppingItem[]>;
@@ -44,7 +45,13 @@ export async function generateShoppingList(
 ): Promise<ShoppingList> {
   const supabase = createClient();
 
-  // 1. Get all recipe_ids from meal_plan for date range
+  // 1. Fetch staples for this household (always included)
+  const { data: staples } = await supabase
+    .from("staples")
+    .select("id, name, category")
+    .eq("household_id", householdId);
+
+  // 2. Get all recipe_ids from meal_plan for date range
   const { data: meals, error: mealsError } = await supabase
     .from("meal_plan")
     .select("recipe_id")
@@ -54,84 +61,118 @@ export async function generateShoppingList(
 
   if (mealsError) {
     console.error("Error fetching meals:", mealsError);
-    return {};
-  }
-
-  if (!meals || meals.length === 0) {
-    return {};
   }
 
   // Get unique recipe IDs
-  const recipeIds = [...new Set(meals.map((m) => m.recipe_id).filter(Boolean))];
+  const recipeIds = meals
+    ? [...new Set(meals.map((m) => m.recipe_id).filter(Boolean))]
+    : [];
 
-  if (recipeIds.length === 0) {
-    return {};
+  // 3. Get all ingredients for those recipes (if any)
+  let ingredients: RawIngredient[] = [];
+  if (recipeIds.length > 0) {
+    const { data: ingredientsData, error: ingredientsError } = await supabase
+      .from("recipe_ingredients")
+      .select("name, line, qty, unit")
+      .in("recipe_id", recipeIds);
+
+    if (ingredientsError) {
+      console.error("Error fetching ingredients:", ingredientsError);
+    } else if (ingredientsData) {
+      ingredients = ingredientsData as RawIngredient[];
+    }
   }
 
-  // 2. Get all ingredients for those recipes
-  const { data: ingredients, error: ingredientsError } = await supabase
-    .from("recipe_ingredients")
-    .select("name, line, qty, unit")
-    .in("recipe_id", recipeIds);
+  // Collect all ingredient names (from recipes + staples) for category/pantry lookup
+  const allNames = new Set<string>();
+  ingredients.forEach((i) => allNames.add(i.name.toLowerCase()));
+  staples?.forEach((s) => allNames.add(s.name.toLowerCase()));
 
-  if (ingredientsError) {
-    console.error("Error fetching ingredients:", ingredientsError);
-    return {};
-  }
-
-  if (!ingredients || ingredients.length === 0) {
-    return {};
-  }
-
-  // 3. Get category mappings
-  const ingredientNames = [...new Set(ingredients.map((i) => i.name.toLowerCase()))];
-  const { data: categories } = await supabase
-    .from("ingredient_categories")
-    .select("ingredient_name, category")
-    .in("ingredient_name", ingredientNames);
+  // 4. Get category mappings for recipe ingredients (staples have their own category)
+  const ingredientNames = [...allNames];
+  const { data: categories } = ingredientNames.length > 0
+    ? await supabase
+        .from("ingredient_categories")
+        .select("ingredient_name, category")
+        .in("ingredient_name", ingredientNames)
+    : { data: [] };
 
   const categoryMap = new Map<string, string>();
   categories?.forEach((c) => {
     categoryMap.set(c.ingredient_name.toLowerCase(), c.category);
   });
 
-  // 4. Get pantry state
-  const { data: pantryItems } = await supabase
-    .from("pantry")
-    .select("ingredient_name, have")
-    .eq("household_id", householdId)
-    .in("ingredient_name", ingredientNames);
+  // 5. Get pantry state
+  const { data: pantryItems } = ingredientNames.length > 0
+    ? await supabase
+        .from("pantry")
+        .select("ingredient_name, have")
+        .eq("household_id", householdId)
+        .in("ingredient_name", ingredientNames)
+    : { data: [] };
 
   const pantryMap = new Map<string, boolean>();
   pantryItems?.forEach((p) => {
     pantryMap.set(p.ingredient_name.toLowerCase(), p.have);
   });
 
-  // 5. Aggregate ingredients
-  const aggregated = aggregateIngredients(ingredients as RawIngredient[]);
-
   // 6. Build shopping list grouped by category
   const shoppingList: ShoppingList = {};
 
-  for (const item of aggregated) {
-    const nameLower = item.name.toLowerCase();
-    const category = categoryMap.get(nameLower) || "Other";
-    const have = pantryMap.get(nameLower) || false;
+  // Add staples first (always included)
+  if (staples) {
+    for (const staple of staples) {
+      const nameLower = staple.name.toLowerCase();
+      const have = pantryMap.get(nameLower) || false;
 
-    const shoppingItem: ShoppingItem = {
-      id: item.id,
-      name: item.name,
-      displayLine: item.displayLine,
-      category,
-      have,
-      qty: item.qty,
-      unit: item.unit,
-    };
+      const shoppingItem: ShoppingItem = {
+        id: `staple-${staple.id}`,
+        name: staple.name,
+        displayLine: staple.name,
+        category: staple.category,
+        have,
+        qty: null,
+        unit: null,
+        isStaple: true,
+      };
 
-    if (!shoppingList[category]) {
-      shoppingList[category] = [];
+      if (!shoppingList[staple.category]) {
+        shoppingList[staple.category] = [];
+      }
+      shoppingList[staple.category].push(shoppingItem);
     }
-    shoppingList[category].push(shoppingItem);
+  }
+
+  // 7. Aggregate recipe ingredients and add them
+  if (ingredients.length > 0) {
+    const aggregated = aggregateIngredients(ingredients);
+
+    for (const item of aggregated) {
+      const nameLower = item.name.toLowerCase();
+      const category = categoryMap.get(nameLower) || "Other";
+      const have = pantryMap.get(nameLower) || false;
+
+      // Skip if this is already a staple (avoid duplicates)
+      const existingInCategory = shoppingList[category];
+      if (existingInCategory?.some((s) => s.name.toLowerCase() === nameLower && s.isStaple)) {
+        continue;
+      }
+
+      const shoppingItem: ShoppingItem = {
+        id: item.id,
+        name: item.name,
+        displayLine: item.displayLine,
+        category,
+        have,
+        qty: item.qty,
+        unit: item.unit,
+      };
+
+      if (!shoppingList[category]) {
+        shoppingList[category] = [];
+      }
+      shoppingList[category].push(shoppingItem);
+    }
   }
 
   // Sort items within each category alphabetically
