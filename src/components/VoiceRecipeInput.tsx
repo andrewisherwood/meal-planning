@@ -204,13 +204,18 @@ export function VoiceRecipeInput({ onTranscript, disabled }: VoiceRecipeInputPro
         </div>
       )}
 
-      {/* Transcript preview */}
+      {/* Transcript preview - editable */}
       {transcript && (
         <div className="space-y-2">
-          <label className="text-sm font-medium text-text-primary">Transcript:</label>
-          <div className="p-4 rounded-xl border border-border bg-surface min-h-[100px] max-h-[200px] overflow-y-auto">
-            <p className="text-sm text-text-primary whitespace-pre-wrap">{transcript}</p>
-          </div>
+          <label className="text-sm font-medium text-text-primary">
+            Transcript <span className="text-text-muted font-normal">(edit if needed)</span>:
+          </label>
+          <textarea
+            value={transcript}
+            onChange={(e) => setTranscript(e.target.value)}
+            className="w-full p-4 rounded-xl border border-border bg-surface min-h-[100px] max-h-[200px] text-sm text-text-primary resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            placeholder="Edit transcript here..."
+          />
           <div className="flex gap-2">
             <button
               type="button"

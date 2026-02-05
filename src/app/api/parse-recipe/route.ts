@@ -50,20 +50,34 @@ Tag guidelines:
 Respond ONLY with valid JSON, no markdown code blocks or explanation.`;
 }
 
+type ImageInput = {
+  data: string; // base64 encoded
+  mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+};
+
 export async function POST(request: Request) {
   try {
-    const { text, unitSystem = "metric", defaultServings = 4 } = await request.json();
+    const { text, image, unitSystem = "metric", defaultServings = 4 } = await request.json() as {
+      text?: string;
+      image?: ImageInput;
+      unitSystem?: string;
+      defaultServings?: number;
+    };
 
-    if (!text || typeof text !== "string" || text.trim().length === 0) {
+    // Must have either text or image
+    const hasText = text && typeof text === "string" && text.trim().length > 0;
+    const hasImage = image && image.data && image.mediaType;
+
+    if (!hasText && !hasImage) {
       return NextResponse.json(
-        { error: "Missing or empty text" },
+        { error: "Missing text or image" },
         { status: 400 }
       );
     }
 
-    if (text.length > 10000) {
+    if (hasText && text.length > 15000) {
       return NextResponse.json(
-        { error: "Text too long (max 10000 characters)" },
+        { error: "Text too long (max 15000 characters)" },
         { status: 400 }
       );
     }
@@ -83,6 +97,30 @@ export async function POST(request: Request) {
 
     const anthropic = new Anthropic({ apiKey });
 
+    // Build message content based on input type
+    let messageContent: Anthropic.MessageCreateParams["messages"][0]["content"];
+
+    if (hasImage) {
+      // Vision mode: send image with extraction prompt
+      messageContent = [
+        {
+          type: "image" as const,
+          source: {
+            type: "base64" as const,
+            media_type: image.mediaType,
+            data: image.data,
+          },
+        },
+        {
+          type: "text" as const,
+          text: "Extract the recipe from this image and return it as structured JSON. Include all ingredients with quantities and all cooking steps.",
+        },
+      ];
+    } else {
+      // Text mode: parse the text description
+      messageContent = `Parse this recipe description into structured JSON:\n\n${text!.trim()}`;
+    }
+
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 2048,
@@ -90,7 +128,7 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "user",
-          content: `Parse this recipe description into structured JSON:\n\n${text.trim()}`,
+          content: messageContent,
         },
       ],
     });
