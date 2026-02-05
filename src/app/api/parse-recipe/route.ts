@@ -7,26 +7,38 @@ const VALID_TAGS = [
   "vegetarian", "vegan", "kid_friendly", "quick", "batch_cook", "freezer_friendly"
 ] as const;
 
-const SYSTEM_PROMPT = `You are a recipe parser. Convert spoken or written recipe descriptions into structured JSON.
+function buildSystemPrompt(unitSystem: string, defaultServings: number): string {
+  const isMetric = unitSystem === "metric";
+  const unitInstructions = isMetric
+    ? "Use METRIC units (grams, ml, kg, L) for all measurements"
+    : "Use IMPERIAL units (oz, lb, cups, fl oz) for all measurements";
+  const unitExamples = isMetric
+    ? '(metric units: g, kg, ml, L, tbsp, tsp, or null for count items)'
+    : '(imperial units: oz, lb, cups, fl oz, tbsp, tsp, or null for count items)';
+  const ingredientExample = isMetric
+    ? '"200g chicken breast"'
+    : '"8oz chicken breast"';
+
+  return `You are a recipe parser. Convert spoken or written recipe descriptions into structured JSON.
 
 IMPORTANT RULES:
-- Use METRIC units (grams, ml, etc.) for all measurements
-- Default to 4 servings if not specified
+- ${unitInstructions}
+- Default to ${defaultServings} servings if not specified
 - Only use tags from the allowed list below
 - If the recipe is a dessert or sweet dish, use the tag "pudding" (not "dessert")
 
 Extract and return a JSON object with these fields:
 - title: string (the recipe name)
-- servings: number (default to 4 if not specified)
+- servings: number (default to ${defaultServings} if not specified)
 - prep_minutes: number | null
 - cook_minutes: number | null
 - tags: string[] - ONLY use tags from this list: ${VALID_TAGS.join(", ")}
 - notes: string | null (any tips or variations mentioned)
 - ingredients: array of objects, each with:
-  - line: string (the full ingredient line with metric units, e.g., "200g chicken breast")
+  - line: string (the full ingredient line, e.g., ${ingredientExample})
   - name: string (just the ingredient name, e.g., "chicken breast")
-  - qty: number | null (the quantity, e.g., 200)
-  - unit: string | null (metric units: g, kg, ml, L, tbsp, tsp, or null for count items)
+  - qty: number | null (the quantity)
+  - unit: string | null ${unitExamples}
 - steps: string[] (clear, actionable cooking instructions)
 
 Tag guidelines:
@@ -36,10 +48,11 @@ Tag guidelines:
 - Dish type: soup, pudding (for desserts/sweets), side
 
 Respond ONLY with valid JSON, no markdown code blocks or explanation.`;
+}
 
 export async function POST(request: Request) {
   try {
-    const { text } = await request.json();
+    const { text, unitSystem = "metric", defaultServings = 4 } = await request.json();
 
     if (!text || typeof text !== "string" || text.trim().length === 0) {
       return NextResponse.json(
@@ -63,12 +76,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate and use settings
+    const validUnitSystem = unitSystem === "imperial" ? "imperial" : "metric";
+    const validServings = Math.min(Math.max(Number(defaultServings) || 4, 1), 20);
+    const systemPrompt = buildSystemPrompt(validUnitSystem, validServings);
+
     const anthropic = new Anthropic({ apiKey });
 
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 2048,
-      system: SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: [
         {
           role: "user",
@@ -107,7 +125,7 @@ export async function POST(request: Request) {
       );
     }
     if (!recipe.servings || typeof recipe.servings !== "number") {
-      recipe.servings = 4;
+      recipe.servings = validServings;
     }
 
     return NextResponse.json({ recipe });

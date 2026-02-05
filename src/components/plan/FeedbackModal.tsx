@@ -16,6 +16,8 @@ type FeedbackModalProps = {
   mealPlanId: string;
   mealName: string;
   date: string;
+  recipeId?: string;
+  onLeftoversAdded?: () => void; // Callback to refresh plan data
 };
 
 function formatDate(ymd: string): string {
@@ -34,8 +36,11 @@ export function FeedbackModal({
   mealPlanId,
   mealName,
   date,
+  recipeId,
+  onLeftoversAdded,
 }: FeedbackModalProps) {
   const [submitting, setSubmitting] = useState(false);
+  const [saveLeftovers, setSaveLeftovers] = useState(false);
 
   const triggerConfetti = () => {
     // Fire confetti from both sides
@@ -79,8 +84,9 @@ export function FeedbackModal({
     // Trigger confetti immediately for responsiveness
     triggerConfetti();
 
-    // Record completion
     const supabase = createClient();
+
+    // Record completion
     await supabase.from("meal_completions").upsert(
       {
         meal_plan_id: mealPlanId,
@@ -93,9 +99,49 @@ export function FeedbackModal({
       }
     );
 
+    // Add leftovers to tomorrow's lunch if checkbox is checked
+    if (saveLeftovers && recipeId) {
+      // Get household_id from the meal_plan entry
+      const { data: mealData } = await supabase
+        .from("meal_plan")
+        .select("household_id")
+        .eq("id", mealPlanId)
+        .single();
+
+      if (mealData?.household_id) {
+        // Calculate tomorrow's date
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowYmd = tomorrow.toISOString().slice(0, 10);
+
+        // Get next position for lunch slot
+        const { data: existing } = await supabase
+          .from("meal_plan")
+          .select("pos")
+          .eq("household_id", mealData.household_id)
+          .eq("date", tomorrowYmd)
+          .eq("meal", "lunch");
+
+        const maxPos = existing?.length ? Math.max(...existing.map((r) => r.pos)) : 0;
+
+        // Insert leftover entry
+        await supabase.from("meal_plan").insert({
+          household_id: mealData.household_id,
+          date: tomorrowYmd,
+          meal: "lunch",
+          pos: maxPos + 1,
+          recipe_id: recipeId,
+          notes: "Leftovers",
+        });
+
+        onLeftoversAdded?.();
+      }
+    }
+
     // Auto-close after confetti settles
     setTimeout(() => {
       setSubmitting(false);
+      setSaveLeftovers(false);
       onClose();
     }, 1500);
   };
@@ -138,6 +184,21 @@ export function FeedbackModal({
           <div className="text-center py-4">
             <p className="text-lg font-medium text-text-primary">{mealName}</p>
           </div>
+
+          {/* Leftovers checkbox */}
+          {recipeId && (
+            <label className="flex items-center gap-3 p-3 rounded-xl bg-surface-muted cursor-pointer hover:bg-surface transition-colors">
+              <input
+                type="checkbox"
+                checked={saveLeftovers}
+                onChange={(e) => setSaveLeftovers(e.target.checked)}
+                className="w-5 h-5 rounded border-border text-green-500 focus:ring-green-500 cursor-pointer"
+              />
+              <span className="text-sm text-text-primary">
+                Save leftovers for tomorrow&apos;s lunch
+              </span>
+            </label>
+          )}
 
           {/* Everyone Ate button */}
           <button

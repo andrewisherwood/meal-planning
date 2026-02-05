@@ -7,6 +7,7 @@ import { NotificationSettings } from './notification-settings'
 import { PrivacySection } from './privacy-section'
 import { DeleteAccount } from './delete-account'
 import { StaplesSettings } from './staples-settings'
+import { RecipeSettings } from './recipe-settings'
 
 type HouseholdData = {
   id: string;
@@ -19,6 +20,8 @@ type HouseholdData = {
   notifications_enabled: boolean | null;
   notification_time: string | null;
   notification_sound: boolean | null;
+  unit_system: string | null;
+  default_servings: number | null;
 };
 
 export default async function SettingsPage() {
@@ -44,7 +47,9 @@ export default async function SettingsPage() {
         dinner_time,
         notifications_enabled,
         notification_time,
-        notification_sound
+        notification_sound,
+        unit_system,
+        default_servings
       )
     `)
     .eq('user_id', user.id)
@@ -119,6 +124,16 @@ export default async function SettingsPage() {
             initialNotificationsEnabled={household.notifications_enabled ?? true}
             initialNotificationTime={household.notification_time ?? "19:00"}
             initialNotificationSound={household.notification_sound ?? false}
+          />
+        </div>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-lg font-medium text-[var(--text-primary)] mb-3">Recipe Preferences</h2>
+        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+          <RecipeSettings
+            initialUnitSystem={household.unit_system ?? "metric"}
+            initialDefaultServings={household.default_servings ?? 4}
           />
         </div>
       </section>

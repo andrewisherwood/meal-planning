@@ -335,7 +335,7 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
         </DialogHeader>
 
         {/* Content */}
-        <div className="p-6 pt-4 space-y-6 overflow-y-auto max-h-[60vh]">
+        <div className="p-6 pt-4 space-y-6 overflow-y-auto max-h-[50vh]">
           {loading ? (
             <p className="text-sm text-text-muted py-4 text-center">Loading...</p>
           ) : isEditing ? (
@@ -524,32 +524,35 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
                 )}
               </section>
 
-              {/* Done cooking button */}
-              <section className="pt-4 border-t border-border">
-                <button
-                  type="button"
-                  onClick={() => setShowFeedback(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-500 text-white font-medium hover:bg-green-600 transition-colors cursor-pointer"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  Done cooking?
-                </button>
-              </section>
             </>
           )}
         </div>
+
+        {/* Done cooking button - sticky footer (only in view mode) */}
+        {!loading && !isEditing && (
+          <div className="p-4 border-t border-border bg-white">
+            <button
+              type="button"
+              onClick={() => setShowFeedback(true)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-500 text-white font-medium hover:bg-green-600 transition-colors cursor-pointer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Done cooking?
+            </button>
+          </div>
+        )}
       </DialogContent>
 
       {/* Feedback modal */}
@@ -563,6 +566,8 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
           mealPlanId={meal.id}
           mealName={meal.recipes?.title ?? "This meal"}
           date={meal.date}
+          recipeId={meal.recipe_id}
+          onLeftoversAdded={onUpdate}
         />
       )}
     </Dialog>
