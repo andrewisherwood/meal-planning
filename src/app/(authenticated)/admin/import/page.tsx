@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { VoiceRecipeInput } from "@/components/VoiceRecipeInput";
@@ -44,6 +44,25 @@ export default function ImportPage() {
   const [parsing, setParsing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [householdId, setHouseholdId] = useState<string | null>(null);
+
+  // Fetch user's household on mount
+  useEffect(() => {
+    async function fetchHousehold() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("households")
+        .select("id")
+        .single();
+
+      if (error) {
+        setError("Failed to load household. Please complete onboarding.");
+        return;
+      }
+      setHouseholdId(data.id);
+    }
+    fetchHousehold();
+  }, []);
 
   const handleParseRecipe = async (text: string) => {
     setParsing(true);
@@ -79,7 +98,7 @@ export default function ImportPage() {
   };
 
   const handleSaveRecipe = async () => {
-    if (!parsedRecipe) return;
+    if (!parsedRecipe || !householdId) return;
 
     setSaving(true);
     setError(null);
@@ -88,7 +107,7 @@ export default function ImportPage() {
       const supabase = createClient();
       const slug = slugify(parsedRecipe.title) + "-" + Date.now().toString(36);
 
-      // 1) Insert recipe
+      // 1) Insert recipe with household_id for RLS
       const { data: inserted, error: recipeErr } = await supabase
         .from("recipes")
         .insert({
@@ -99,6 +118,7 @@ export default function ImportPage() {
           cook_minutes: parsedRecipe.cook_minutes ?? null,
           tags: parsedRecipe.tags ?? null,
           notes: parsedRecipe.notes ?? null,
+          household_id: householdId,
         })
         .select("id,slug")
         .single();
@@ -298,7 +318,7 @@ export default function ImportPage() {
             <button
               type="button"
               onClick={handleSaveRecipe}
-              disabled={saving || !parsedRecipe.title}
+              disabled={saving || !parsedRecipe.title || !householdId}
               className="flex-1 px-4 py-3 rounded-xl bg-text-primary text-surface font-medium hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save recipe"}
