@@ -1,9 +1,52 @@
 import { NextResponse } from "next/server";
-import { JSDOM } from "jsdom";
-import { Readability } from "@mozilla/readability";
 
-// Force Node.js runtime (jsdom requires Node.js APIs)
-export const runtime = "nodejs";
+// Simple HTML to text extraction without jsdom
+function extractTextFromHtml(html: string): { text: string; title: string | null } {
+  // Extract title
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  const title = titleMatch ? titleMatch[1].trim() : null;
+
+  // Remove script and style tags and their content
+  let text = html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, "");
+
+  // Remove HTML comments
+  text = text.replace(/<!--[\s\S]*?-->/g, "");
+
+  // Replace common block elements with newlines
+  text = text.replace(/<\/(p|div|h[1-6]|li|tr|br|hr)[^>]*>/gi, "\n");
+  text = text.replace(/<(br|hr)[^>]*\/?>/gi, "\n");
+
+  // Remove all remaining HTML tags
+  text = text.replace(/<[^>]+>/g, " ");
+
+  // Decode common HTML entities
+  text = text
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&rsquo;/gi, "'")
+    .replace(/&lsquo;/gi, "'")
+    .replace(/&rdquo;/gi, '"')
+    .replace(/&ldquo;/gi, '"')
+    .replace(/&mdash;/gi, "—")
+    .replace(/&ndash;/gi, "–")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
+
+  // Clean up whitespace
+  text = text
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/^\s+|\s+$/gm, "")
+    .trim();
+
+  return { text, title };
+}
 
 export async function POST(request: Request) {
   try {
@@ -67,33 +110,25 @@ export async function POST(request: Request) {
 
     const html = await response.text();
 
-    // Parse with JSDOM and Readability
-    const dom = new JSDOM(html, { url: parsedUrl.href });
-    const reader = new Readability(dom.window.document);
-    const article = reader.parse();
+    // Extract text without jsdom
+    const { text, title } = extractTextFromHtml(html);
 
-    if (!article || !article.textContent) {
+    if (!text || text.length < 50) {
       return NextResponse.json(
         { error: "Could not extract content from page" },
         { status: 422 }
       );
     }
 
-    // Clean up the text - remove excessive whitespace
-    const cleanText = article.textContent
-      .replace(/\n{3,}/g, "\n\n")
-      .replace(/[ \t]+/g, " ")
-      .trim();
-
     // Limit to reasonable size for recipe parsing
     const maxLength = 15000;
-    const truncatedText = cleanText.length > maxLength
-      ? cleanText.slice(0, maxLength) + "\n\n[Content truncated...]"
-      : cleanText;
+    const truncatedText = text.length > maxLength
+      ? text.slice(0, maxLength) + "\n\n[Content truncated...]"
+      : text;
 
     return NextResponse.json({
       text: truncatedText,
-      title: article.title || null,
+      title,
     });
   } catch (error) {
     console.error("Fetch URL error:", error);
