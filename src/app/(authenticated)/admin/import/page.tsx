@@ -45,14 +45,16 @@ export default function ImportPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [householdId, setHouseholdId] = useState<string | null>(null);
+  const [unitSystem, setUnitSystem] = useState<string>("metric");
+  const [defaultServings, setDefaultServings] = useState<number>(4);
 
-  // Fetch user's household on mount
+  // Fetch user's household settings on mount
   useEffect(() => {
     async function fetchHousehold() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("households")
-        .select("id")
+        .select("id, unit_system, default_servings")
         .single();
 
       if (error) {
@@ -60,6 +62,8 @@ export default function ImportPage() {
         return;
       }
       setHouseholdId(data.id);
+      setUnitSystem(data.unit_system ?? "metric");
+      setDefaultServings(data.default_servings ?? 4);
     }
     fetchHousehold();
   }, []);
@@ -73,7 +77,7 @@ export default function ImportPage() {
       const response = await fetch("/api/parse-recipe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, unitSystem, defaultServings }),
       });
 
       const data = await response.json();
