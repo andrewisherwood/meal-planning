@@ -57,6 +57,8 @@ This is a **planning surface** that happens to know about food.
 ## Data Model (Key Concepts)
 
 - `households` — family units that share a meal plan
+  - `unit_system` (metric/imperial for recipe parsing)
+  - `default_servings` (1-12, default 4)
 - `household_members` — links users to households (includes `is_owner` for ownership tracking)
 - `profiles` — user consent/privacy data (terms acceptance, notification consent timestamps)
 - `recipes` — shared library + household-private recipes (`household_id` NULL = shared)
@@ -218,9 +220,18 @@ Claude should **always**:
 - Privacy & Data section in Settings
 - `profiles` table for consent tracking
 
+### Phase 11 ✅ Complete
+
+- Recipe import enhancements (Voice, URL, Photo, Paste tabs)
+- URL ingest with Readability content extraction
+- Photo/image ingest with Claude Vision API
+- Editable voice transcript before parsing
+- Recipe settings (unit system, default servings)
+- Leftovers quick-add (checkbox in feedback modal → tomorrow's lunch)
+
 ### Future Ideas
 
-- Leftovers tracking
+- Full leftovers/fridge tracking
 - Smart features (LLM-powered suggestions)
 - Skylight email integration
 

@@ -13,7 +13,7 @@ Goal: Test and polish before sharing with family/friends.
 
 ---
 
-## Next: Leftovers Tracking (Phase 10)
+## Next: Full Leftovers Tracking (Phase 10 remaining)
 
 Goal: Make batch cooking feel strategic, not wasteful.
 
@@ -28,7 +28,7 @@ Goal: Make batch cooking feel strategic, not wasteful.
 
 - LLM-powered "Plan my week" suggestions
 - Pantry scanning with vision
-- Recipe import from URL
+- Family member profiles in onboarding
 
 ---
 
@@ -40,6 +40,20 @@ Goal: Make batch cooking feel strategic, not wasteful.
 ---
 
 ## Recently Completed
+
+### Recipe Import Enhancements (Phase 11)
+- [x] URL ingest with Readability content extraction
+- [x] Photo ingest with Claude Vision API
+- [x] Editable voice transcript before parsing
+- [x] Four-tab import interface (Voice | URL | Photo | Paste)
+- [x] Recipe settings (unit system, default servings)
+- [x] Leftovers quick-add checkbox in feedback modal
+
+### Bug Fixes
+- [x] Center + add button in slots
+- [x] Fix RLS violation when saving imported recipes
+- [x] Fix "Done cooking" button visibility on mobile
+- [x] Recipe tags align with system (pudding not dessert)
 
 ### "Everyone Ate" Feedback Loop (Phase 9)
 - [x] Push notification at configurable time (default: 7pm)

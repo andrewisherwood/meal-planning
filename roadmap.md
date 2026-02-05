@@ -461,27 +461,81 @@ Stop condition: good recipes bubble up naturally. ✅
 
 ---
 
-## Phase 10 — Leftovers (later)
+## Phase 10 — Leftovers (partial)
 
 Goal
 
 Effort pays forward.
 
-### Loop 10.1 Mark recipes as "makes leftovers"
+### Loop 10.1 Quick leftovers add (done)
+
+Checkbox in feedback modal: "Save leftovers for tomorrow's lunch?"
+
+Inserts meal to next day's lunch slot with "Leftovers" note
+
+### Loop 10.2 Mark recipes as "makes leftovers" (later)
 
 Yields 2x, batch cooking flag
 
-### Loop 10.2 Suggest leftover lunches
+### Loop 10.3 Suggest leftover lunches (later)
 
 When planning, suggest "Leftover [X]" for next day
 
-### Loop 10.3 Fridge tracking
+### Loop 10.4 Fridge tracking (later)
 
 Simple list of what's in the fridge
 
 "Use up leftovers" prompt when planning
 
 Stop condition: batch cooking feels strategic, not wasteful.
+
+---
+
+## Phase 11 — Recipe Import Enhancements (done)
+
+Goal
+
+Get recipes into the system from anywhere.
+
+### Loop 11.1 Recipe settings (done)
+
+Unit system toggle (metric/imperial) in Settings
+
+Default servings (1-12) in Settings
+
+Settings stored on households table
+
+Parse API uses settings for LLM prompt
+
+### Loop 11.2 Editable voice transcript (done)
+
+Changed read-only transcript display to editable textarea
+
+User can correct speech recognition errors before parsing
+
+### Loop 11.3 URL ingest (done)
+
+New API route: `/api/fetch-url`
+
+Uses jsdom + @mozilla/readability for content extraction
+
+Editable textarea for extracted text before parsing
+
+### Loop 11.4 Photo ingest (done)
+
+Updated `/api/parse-recipe` to accept image input
+
+Claude Vision API extracts recipe from photos
+
+Supports JPEG, PNG, GIF, WebP formats
+
+### Loop 11.5 Import page tabs (done)
+
+Four-tab interface: Voice | URL | Photo | Paste
+
+Consistent flow: input → editable text → parse → review → save
+
+Stop condition: recipes from cookbooks, websites, and voice all work. ✅
 
 ---
 
