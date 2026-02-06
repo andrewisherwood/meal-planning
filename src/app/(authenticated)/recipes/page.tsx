@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 type Recipe = {
@@ -11,6 +12,7 @@ type Recipe = {
   prep_minutes: number | null;
   cook_minutes: number | null;
   tags: string[] | null;
+  image_url: string | null;
 };
 
 // Mealtime filters
@@ -54,7 +56,7 @@ export default function RecipesPage() {
       const supabase = createClient();
       let request = supabase
         .from("recipes")
-        .select("id,title,slug,prep_minutes,cook_minutes,tags")
+        .select("id,title,slug,prep_minutes,cook_minutes,tags,image_url")
         .limit(100);
 
       // Apply text search
@@ -148,19 +150,55 @@ export default function RecipesPage() {
           {query || filter !== "all" ? "No recipes found" : "No recipes yet"}
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {recipes.map((r) => {
             const total = (r.prep_minutes ?? 0) + (r.cook_minutes ?? 0);
             return (
               <Link
                 key={r.id}
                 href={`/r/${r.slug}`}
-                className="block p-4 border border-border rounded-xl hover:bg-surface-muted transition-colors"
+                className="block border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow bg-surface"
               >
-                <div className="text-lg font-semibold text-text-primary">{r.title}</div>
-                <div className="text-text-secondary mt-1">
-                  {total ? `${total} min` : "—"}
-                  {r.tags?.length ? ` · ${r.tags.join(", ")}` : ""}
+                {/* Image or placeholder */}
+                <div className="relative aspect-[16/9] bg-brand-accent">
+                  {r.image_url ? (
+                    <Image
+                      src={r.image_url}
+                      alt={r.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="48"
+                        height="48"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-white/60"
+                      >
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+                        <path d="M7 2v20" />
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                {/* Card content */}
+                <div className="p-3">
+                  <div className="text-base font-semibold text-text-primary line-clamp-2 leading-snug">
+                    {r.title}
+                  </div>
+                  <div className="text-sm text-text-secondary mt-1.5">
+                    {total ? `${total} min` : "—"}
+                    {r.tags?.length ? ` · ${r.tags.slice(0, 2).join(", ")}` : ""}
+                  </div>
                 </div>
               </Link>
             );

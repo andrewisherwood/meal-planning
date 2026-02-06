@@ -18,6 +18,7 @@ export type JoinedRecipe = {
   title: string;
   slug: string;
   tags: string[] | null;
+  image_url: string | null;
 };
 
 export type PlanRow = {
@@ -103,6 +104,7 @@ export type Recipe = {
   title: string;
   slug: string;
   tags: string[] | null;
+  image_url: string | null;
 };
 
 function PlanPageContent() {
@@ -326,7 +328,8 @@ function PlanPageContent() {
             id,
             title,
             slug,
-            tags
+            tags,
+            image_url
           )
         `
         )
@@ -408,7 +411,7 @@ function PlanPageContent() {
       meal: selectedCell.slot,
       pos: newPos,
       recipe_id: recipe.id,
-      recipes: { id: recipe.id, title: recipe.title, slug: recipe.slug, tags: recipe.tags },
+      recipes: { id: recipe.id, title: recipe.title, slug: recipe.slug, tags: recipe.tags, image_url: recipe.image_url },
       notes: null,
     };
     setRows([...rows, newRow]);
@@ -673,7 +676,8 @@ function PlanPageContent() {
                     id,
                     title,
                     slug,
-                    tags
+                    tags,
+                    image_url
                   )
                 `)
                 .eq("id", selectedMeal.id)

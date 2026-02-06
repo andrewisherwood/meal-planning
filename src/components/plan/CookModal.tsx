@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -199,6 +200,20 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
+        {/* Hero image */}
+        {meal.recipes?.image_url && (
+          <div className="relative h-48 w-full">
+            <Image
+              src={meal.recipes.image_url}
+              alt={meal.recipes.title ?? "Recipe"}
+              fill
+              priority
+              sizes="(max-width: 512px) 90vw, 512px"
+              className="object-cover"
+            />
+          </div>
+        )}
+
         {/* Header */}
         <DialogHeader className="p-6 pb-4 border-b border-border">
           <div className="flex items-start justify-between gap-4">

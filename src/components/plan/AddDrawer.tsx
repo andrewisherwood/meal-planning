@@ -35,6 +35,7 @@ type Recipe = {
   prep_minutes: number | null;
   cook_minutes: number | null;
   tags: string[] | null;
+  image_url: string | null;
 };
 
 type AddDrawerProps = {
@@ -153,7 +154,7 @@ export function AddDrawer({ open, onClose, date, slot, householdId, onAddRecipe 
       const supabase = createClient();
       let request = supabase
         .from("recipes")
-        .select("id,title,slug,prep_minutes,cook_minutes,tags")
+        .select("id,title,slug,prep_minutes,cook_minutes,tags,image_url")
         .limit(100);
 
       // Apply text search (limit query length for safety)

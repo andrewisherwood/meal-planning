@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,6 +15,7 @@ type Recipe = {
   cook_minutes: number | null;
   tags: string[] | null;
   notes: string | null;
+  image_url: string | null;
 };
 
 type Ingredient = { id: string; line: string; optional: boolean };
@@ -49,7 +51,7 @@ export default function RecipePage() {
 
       const { data: recipeData, error: recipeError } = await supabase
         .from("recipes")
-        .select("id,title,slug,servings,prep_minutes,cook_minutes,tags,notes")
+        .select("id,title,slug,servings,prep_minutes,cook_minutes,tags,notes,image_url")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -210,13 +212,28 @@ export default function RecipePage() {
   const total = (recipe.prep_minutes ?? 0) + (recipe.cook_minutes ?? 0);
 
   return (
-    <main className="p-4 md:p-8 max-w-3xl mx-auto">
-      {/* Back link */}
-      <Link href="/recipes" className="text-text-secondary hover:text-text-primary transition-colors">
-        ← Back to recipes
-      </Link>
+    <main className="max-w-3xl mx-auto">
+      {/* Hero image */}
+      {recipe.image_url && (
+        <div className="relative h-48 md:h-64 w-full">
+          <Image
+            src={recipe.image_url}
+            alt={recipe.title}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 768px"
+            className="object-cover"
+          />
+        </div>
+      )}
 
-      {/* Header */}
+      <div className="p-4 md:p-8">
+        {/* Back link */}
+        <Link href="/recipes" className="text-text-secondary hover:text-text-primary transition-colors">
+          ← Back to recipes
+        </Link>
+
+        {/* Header */}
       <div className="flex items-start justify-between gap-4 mt-4 mb-6">
         <div className="flex-1">
           {isEditing ? (
@@ -424,27 +441,28 @@ export default function RecipePage() {
         )}
       </section>
 
-      {/* Save/Cancel buttons (edit mode) */}
-      {isEditing && (
-        <div className="flex gap-3 pt-4 border-t border-border">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 px-4 py-2 rounded-lg bg-text-primary text-surface font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsEditing(false)}
-            disabled={saving}
-            className="px-4 py-2 rounded-lg border border-border text-text-secondary font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+        {/* Save/Cancel buttons (edit mode) */}
+        {isEditing && (
+          <div className="flex gap-3 pt-4 border-t border-border">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 px-4 py-2 rounded-lg bg-text-primary text-surface font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              disabled={saving}
+              className="px-4 py-2 rounded-lg border border-border text-text-secondary font-medium hover:bg-surface-muted transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
