@@ -195,14 +195,14 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent
-        className="bg-white rounded-3xl p-0 max-w-lg w-[90vw] max-h-[85vh] overflow-hidden shadow-2xl border-0"
+        className="bg-white rounded-3xl p-0 max-w-lg w-[90vw] max-h-[85vh] overflow-hidden shadow-2xl border-0 flex flex-col"
         showCloseButton={false}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         {/* Hero image */}
         {meal.recipes?.image_url && (
-          <div className="relative h-48 w-full">
+          <div className="relative h-48 w-full flex-shrink-0">
             <Image
               src={meal.recipes.image_url}
               alt={meal.recipes.title ?? "Recipe"}
@@ -215,7 +215,7 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
         )}
 
         {/* Header */}
-        <DialogHeader className="p-6 pb-4 border-b border-border">
+        <DialogHeader className="p-6 pb-4 border-b border-border flex-shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               {isEditing ? (
@@ -350,7 +350,7 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
         </DialogHeader>
 
         {/* Content */}
-        <div className="p-6 pt-4 space-y-6 overflow-y-auto max-h-[50vh]">
+        <div className="p-6 pt-4 space-y-6 overflow-y-auto flex-1 min-h-0">
           {loading ? (
             <p className="text-sm text-text-muted py-4 text-center">Loading...</p>
           ) : isEditing ? (
@@ -545,7 +545,7 @@ export function CookModal({ meal, onClose, onDelete, onUpdate }: CookModalProps)
 
         {/* Done cooking button - sticky footer (only in view mode) */}
         {!loading && !isEditing && (
-          <div className="p-4 border-t border-border bg-white">
+          <div className="p-4 border-t border-border bg-white flex-shrink-0">
             <button
               type="button"
               onClick={() => setShowFeedback(true)}
